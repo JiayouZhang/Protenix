@@ -685,6 +685,7 @@ class MMCIFParser:
         self,
         assembly_id: str = "1",
         max_assembly_chains: int = 1000,
+        model: int = 1,
     ) -> dict[str, Any]:
         """
         Build the given biological assembly.
@@ -724,7 +725,7 @@ class MMCIFParser:
             return bioassembly_dict
 
         # created AtomArray of first model from mmcif atom_site (Asymmetric Unit)
-        atom_array = self.get_structure()
+        atom_array = self.get_structure(model=model)
 
         # convert MSE to MET to consistent with MMCIFParser.get_poly_res_names()
         atom_array = self.mse_to_met(atom_array)
