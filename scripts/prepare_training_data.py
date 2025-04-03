@@ -24,6 +24,8 @@ from tqdm import tqdm
 from protenix.data.data_pipeline import DataPipeline
 from protenix.utils.file_io import dump_gzip_pickle
 
+KAGGLE = True
+
 
 def gen_a_bioassembly_data(
     mmcif: Path,
@@ -55,7 +57,10 @@ def gen_a_bioassembly_data(
     if sample_indices_list and bioassembly_dict:
         pdb_id = bioassembly_dict["pdb_id"]
         # save to output dir
-        dump_gzip_pickle(bioassembly_dict, bioassembly_output_dir / f"{pdb_id}.pkl.gz")
+        if KAGGLE:
+            dump_gzip_pickle(bioassembly_dict, bioassembly_output_dir / (mmcif.stem.split(".")[0] + ".pkl.gz"))
+        else:
+            dump_gzip_pickle(bioassembly_dict, bioassembly_output_dir / f"{pdb_id}.pkl.gz")
         return sample_indices_list
 
 
