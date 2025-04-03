@@ -45,6 +45,11 @@ from protenix.data.tokenizer import TokenArray
 from protenix.utils.logger import get_logger
 
 logger = get_logger(__name__)
+KAGGLE = True
+if KAGGLE:
+    import pickle
+    with open("/home/jiayou.zhang/hom/personal/rna-stanford/rna-msa-kaggle/query_to_path.pkl", "rb") as f:
+        QUERY_TO_PATH = pickle.load(f)
 
 SEQ_LIMITS = {
     "uniref100": -1,
@@ -319,6 +324,9 @@ class PROTMSAFeaturizer(BaseMSAFeaturizer):
         else:
             self.non_pairing_db = [db_name for db_name in non_pairing_db.split(",")]
 
+        if KAGGLE:
+            return
+
         with open(seq_to_pdb_idx_path, "r") as f:
             self.seq_to_pdb_idx = json.load(f)
         # If distillation data is avaiable
@@ -520,6 +528,8 @@ class RNAMSAFeaturizer(BaseMSAFeaturizer):
         # By default, use all the database in paper
         self.rna_msa_dir = rna_msa_dir
         self.non_pairing_db = ["rfam", "rnacentral", "nucleotide"]
+        if KAGGLE:
+            return
         with open(seq_to_pdb_idx_path, "r") as f:
             self.seq_to_pdb_idx = json.load(f)  # it's rna sequence to pdb list
 
@@ -577,6 +587,24 @@ class RNAMSAFeaturizer(BaseMSAFeaturizer):
         Returns:
             Dict[str, np.ndarray]: the basic MSA features of the input sequence
         """
+        if KAGGLE:
+            if sequence in QUERY_TO_PATH:
+                rna_msa_paths = QUERY_TO_PATH[sequence]
+                seq_limits = [-1] # -1 means no limit
+            else:
+                logger.warning(f"no msa for {sequence}.")
+                rna_msa_paths = []
+                seq_limits = []
+            sequence_features = process_single_sequence(
+                pdb_name=pdb_name,
+                sequence=sequence,
+                raw_msa_paths=rna_msa_paths,
+                seq_limits=seq_limits,
+                msa_entity_type="prot",
+                msa_type="non_pairing",
+            )
+            return sequence_features
+
         raw_msa_paths, seq_limits = [], []
         for db_name in self.non_pairing_db:
             if opexists(
@@ -650,7 +678,7 @@ class MSAFeaturizer:
         enable_rna_msa: bool = False,
     ):
         self.prot_msa_featurizer = PROTMSAFeaturizer(**prot_msa_args)
-        self.enable_rna_msa = enable_rna_msa
+        self.enable_rna_msa = enable_rna_msa if not KAGGLE else True
         if self.enable_rna_msa:
             self.rna_msa_featurizer = RNAMSAFeaturizer(**rna_msa_args)
 
@@ -915,7 +943,7 @@ def merge_all_chain_features(
     )
     if msa_entity_type == "rna":
         np_example = rna_merge(
-            is_homomer_or_monomer=is_homomer_or_monomer,
+            # is_homomer_or_monomer=is_homomer_or_monomer, # TypeError: rna_merge() got an unexpected keyword argument 'is_homomer_or_monomer'
             all_chain_features=all_chain_features,
             merge_method=merge_method,
             msa_crop_size=max_size,

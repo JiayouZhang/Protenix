@@ -120,6 +120,8 @@ class MMCIFParser:
             int: The total number of polymer chains in the specified assembly.
                  If the oligomeric count is invalid (e.g., '?'), the function returns None.
         """
+        if "pdbx_struct_assembly" not in self.cif.block:
+            return -1
         chain_count = 0
         for _assembly_id, _chain_count in zip(
             self.cif.block["pdbx_struct_assembly"]["id"].as_array(),
@@ -187,9 +189,7 @@ class MMCIFParser:
             date = "9999-12-31"
 
         valid_date = _is_valid_date_format(date)
-        assert (
-            valid_date
-        ), f"Invalid date format: {date}, it should be yyyy-mm-dd format"
+        assert valid_date, f"Invalid date format: {date}, it should be yyyy-mm-dd format"
         return date
 
     @staticmethod
@@ -243,9 +243,7 @@ class MMCIFParser:
                 cd_nh2 = atom_array.coord[nh2_idx] - atom_array.coord[cd_idx]
                 d2_cd_nh2 = np.sum(cd_nh2**2)
                 if d2_cd_nh2 < d2_cd_nh1:
-                    atom_array.coord[[nh1_idx, nh2_idx]] = atom_array.coord[
-                        [nh2_idx, nh1_idx]
-                    ]
+                    atom_array.coord[[nh1_idx, nh2_idx]] = atom_array.coord[[nh2_idx, nh1_idx]]
         return atom_array
 
     @functools.cached_property
@@ -268,9 +266,7 @@ class MMCIFParser:
             methods = self.cif.block["exptl"]["method"]
             return methods.as_array()
 
-    def get_poly_res_names(
-        self, atom_array: Optional[AtomArray] = None
-    ) -> dict[str, list[str]]:
+    def get_poly_res_names(self, atom_array: Optional[AtomArray] = None) -> dict[str, list[str]]:
         """get 3-letter residue names by combining mmcif._entity_poly_seq and atom_array
 
         if ref_atom_array is None: keep first altloc residue of the same res_id based in mmcif._entity_poly_seq
@@ -336,9 +332,7 @@ class MMCIFParser:
 
             new_seq_mon_ids = seq_mon_ids[select_mask]
             new_seq_nums = seq_nums[select_mask]
-            assert (
-                len(new_seq_nums) == uniq_seq_num
-            ), f"seq_nums not match:\n{seq_nums=}\n{new_seq_nums=}\n{seq_mon_ids=}\n{new_seq_mon_ids=}"
+            assert len(new_seq_nums) == uniq_seq_num, f"seq_nums not match:\n{seq_nums=}\n{new_seq_nums=}\n{seq_mon_ids=}\n{new_seq_mon_ids=}"
             poly_res_names[entity_id] = new_seq_mon_ids
         return poly_res_names
 
@@ -429,13 +423,8 @@ class MMCIFParser:
                 res_id = atom_array.res_id[res_start]
                 res_altloc[(chain_id, res_id)].append(altloc_char)
 
-            alt_and_avg_occ = [
-                (altloc_char, np.mean(occ_list))
-                for altloc_char, occ_list in occ_dict.items()
-            ]
-            sorted_altloc_chars = [
-                i[0] for i in sorted(alt_and_avg_occ, key=lambda x: x[1], reverse=True)
-            ]
+            alt_and_avg_occ = [(altloc_char, np.mean(occ_list)) for altloc_char, occ_list in occ_dict.items()]
+            sorted_altloc_chars = [i[0] for i in sorted(alt_and_avg_occ, key=lambda x: x[1], reverse=True)]
 
             selected_mask = np.zeros(len(atom_array), dtype=bool)
             for res_start, res_end in zip(res_starts[:-1], res_starts[1:]):
@@ -446,11 +435,7 @@ class MMCIFParser:
                 if altloc_char == ".":
                     selected_mask[res_start:res_end] = True
                 else:
-                    res_sorted_altloc = [
-                        i
-                        for i in sorted_altloc_chars
-                        if i in res_altloc[(chain_id, res_id)]
-                    ]
+                    res_sorted_altloc = [i for i in sorted_altloc_chars if i in res_altloc[(chain_id, res_id)]]
                     selected_altloc = res_sorted_altloc[0]
                     if altloc_char == selected_altloc:
                         selected_mask[res_start:res_end] = True
@@ -484,9 +469,7 @@ class MMCIFParser:
             if atom_array.label_seq_id[chain_start] != ".":
                 continue
             else:
-                res_starts = get_residue_starts(
-                    atom_array[chain_start:chain_stop], add_exclusive_stop=True
-                )
+                res_starts = get_residue_starts(atom_array[chain_start:chain_stop], add_exclusive_stop=True)
                 num = 1
                 for res_start, res_stop in zip(res_starts[:-1], res_starts[1:]):
                     res_id[chain_start:chain_stop][res_start:res_stop] = num
@@ -541,10 +524,7 @@ class MMCIFParser:
 
         model = model_count + model + 1 if model < 0 else model
         if model > model_count:
-            raise ValueError(
-                f"The file has {model_count} models, "
-                f"the given model {model} does not exist"
-            )
+            raise ValueError(f"The file has {model_count} models, " f"the given model {model} does not exist")
 
         model_atom_site = pdbx_convert._filter_model(atom_site, model_starts, model)
         # Any field of the category would work here to get the length
@@ -558,15 +538,11 @@ class MMCIFParser:
         atoms.box = pdbx_convert._get_box(block)
 
         # The below part is the same for both, AtomArray and AtomArrayStack
-        pdbx_convert._fill_annotations(
-            atoms, model_atom_site, extra_fields, use_author_fields
-        )
+        pdbx_convert._fill_annotations(atoms, model_atom_site, extra_fields, use_author_fields)
 
         bonds = struc.connect_via_residue_names(atoms, inter_residue=False)
         if "struct_conn" in block:
-            conn_bonds = pdbx_convert._parse_inter_residue_bonds(
-                model_atom_site, block["struct_conn"]
-            )
+            conn_bonds = pdbx_convert._parse_inter_residue_bonds(model_atom_site, block["struct_conn"])
             coord1 = atoms.coord[conn_bonds._bonds[:, 0]]
             coord2 = atoms.coord[conn_bonds._bonds[:, 1]]
             dist = np.linalg.norm(coord1 - coord2, axis=1)
@@ -589,14 +565,10 @@ class MMCIFParser:
 
         # inference inter residue bonds based on new res_id (label_seq_id).
         # the auth_seq_id is not reliable, some are discontinuous (8bvh), some with insertion codes (6ydy).
-        atom_array = ccd.add_inter_residue_bonds(
-            atom_array, exclude_struct_conn_pairs=True
-        )
+        atom_array = ccd.add_inter_residue_bonds(atom_array, exclude_struct_conn_pairs=True)
         return atom_array
 
-    def expand_assembly(
-        self, structure: AtomArray, assembly_id: str = "1"
-    ) -> AtomArray:
+    def expand_assembly(self, structure: AtomArray, assembly_id: str = "1") -> AtomArray:
         """
         Expand the given assembly to all chains
         copy from biotite.structure.io.pdbx.get_assembly
@@ -614,17 +586,13 @@ class MMCIFParser:
         try:
             assembly_gen_category = block["pdbx_struct_assembly_gen"]
         except KeyError:
-            logging.info(
-                "File has no 'pdbx_struct_assembly_gen' category, return original structure."
-            )
+            logging.info("File has no 'pdbx_struct_assembly_gen' category, return original structure.")
             return structure
 
         try:
             struct_oper_category = block["pdbx_struct_oper_list"]
         except KeyError:
-            logging.info(
-                "File has no 'pdbx_struct_oper_list' category, return original structure."
-            )
+            logging.info("File has no 'pdbx_struct_oper_list' category, return original structure.")
             return structure
 
         assembly_ids = assembly_gen_category["assembly_id"].as_array(str)
@@ -652,12 +620,8 @@ class MMCIFParser:
                 operations = pdbx_convert._parse_operation_expression(op_expr)
                 asym_ids = asym_id_expr.split(",")
                 # Filter affected asym IDs
-                sub_structure = copy.deepcopy(
-                    structure[..., np.isin(structure.label_asym_id, asym_ids)]
-                )
-                sub_assembly = pdbx_convert._apply_transformations(
-                    sub_structure, transformations, operations
-                )
+                sub_structure = copy.deepcopy(structure[..., np.isin(structure.label_asym_id, asym_ids)])
+                sub_assembly = pdbx_convert._apply_transformations(sub_structure, transformations, operations)
                 # Merge the chains with asym IDs for this operation
                 # with chains from other operations
                 if assembly is None:
@@ -719,9 +683,7 @@ class MMCIFParser:
             "resolution": self.resolution,
             "atom_array": None,
         }
-        if (not num_assembly_polymer_chains) or (
-            num_assembly_polymer_chains > max_assembly_chains
-        ):
+        if (not num_assembly_polymer_chains) or (num_assembly_polymer_chains > max_assembly_chains):
             return bioassembly_dict
 
         # created AtomArray of first model from mmcif atom_site (Asymmetric Unit)
@@ -736,13 +698,9 @@ class MMCIFParser:
         pipeline_functions = [
             Filter.remove_water,
             Filter.remove_hydrogens,
-            lambda aa: Filter.remove_polymer_chains_all_residues_unknown(
-                aa, self.entity_poly_type
-            ),
+            lambda aa: Filter.remove_polymer_chains_all_residues_unknown(aa, self.entity_poly_type),
             # Note: Filter.remove_polymer_chains_too_short not being used
-            lambda aa: Filter.remove_polymer_chains_with_consecutive_c_alpha_too_far_away(
-                aa, self.entity_poly_type
-            ),
+            lambda aa: Filter.remove_polymer_chains_with_consecutive_c_alpha_too_far_away(aa, self.entity_poly_type),
             self.fix_arginine,
             self.add_missing_atoms_and_residues,  # and add annotation is_resolved (False for missing atoms)
             Filter.remove_element_X,  # remove X element (including ASX->ASP, GLX->GLU) after add_missing_atoms_and_residues()
@@ -750,9 +708,7 @@ class MMCIFParser:
 
         if set(self.methods) & CRYSTALLIZATION_METHODS:
             # AF3 SI 2.5.4 Crystallization aids are removed if the mmCIF method information indicates that crystallography was used.
-            pipeline_functions.append(
-                lambda aa: Filter.remove_crystallization_aids(aa, self.entity_poly_type)
-            )
+            pipeline_functions.append(lambda aa: Filter.remove_crystallization_aids(aa, self.entity_poly_type))
 
         for func in pipeline_functions:
             atom_array = func(atom_array)
@@ -760,9 +716,7 @@ class MMCIFParser:
                 # no atoms left
                 return bioassembly_dict
 
-        atom_array = AddAtomArrayAnnot.add_token_mol_type(
-            atom_array, self.entity_poly_type
-        )
+        atom_array = AddAtomArrayAnnot.add_token_mol_type(atom_array, self.entity_poly_type)
         atom_array = AddAtomArrayAnnot.add_centre_atom_mask(atom_array)
         atom_array = AddAtomArrayAnnot.add_atom_mol_type_mask(atom_array)
         atom_array = AddAtomArrayAnnot.add_distogram_rep_atom_mask(atom_array)
@@ -770,10 +724,7 @@ class MMCIFParser:
         atom_array = AddAtomArrayAnnot.add_cano_seq_resname(atom_array)
         atom_array = AddAtomArrayAnnot.add_tokatom_idx(atom_array)
         atom_array = AddAtomArrayAnnot.add_modified_res_mask(atom_array)
-        assert (
-            atom_array.centre_atom_mask.sum()
-            == atom_array.distogram_rep_atom_mask.sum()
-        )
+        assert atom_array.centre_atom_mask.sum() == atom_array.distogram_rep_atom_mask.sum()
 
         # expand created AtomArray by expand bioassembly
         atom_array = self.expand_assembly(atom_array, assembly_id)
@@ -818,36 +769,22 @@ class MMCIFParser:
         # update core indices after too_many_chains_filter
         core_indices = np.where(np.isin(atom_array.chain_id, ori_chain_ids))[0]
 
-        atom_array, _removed_chain_ids = Filter.remove_clashing_chains(
-            atom_array, core_indices=core_indices
-        )
+        atom_array, _removed_chain_ids = Filter.remove_clashing_chains(atom_array, core_indices=core_indices)
 
         # remove asymmetric polymer ligand bonds (including protein-protein bond, like disulfide bond)
         # apply to assembly atom array
-        atom_array = Filter.remove_asymmetric_polymer_ligand_bonds(
-            atom_array, self.entity_poly_type
-        )
+        atom_array = Filter.remove_asymmetric_polymer_ligand_bonds(atom_array, self.entity_poly_type)
 
         # add_mol_id before applying the two filters below to ensure that covalent components are not removed as individual chains.
-        atom_array = AddAtomArrayAnnot.find_equiv_mol_and_assign_ids(
-            atom_array, self.entity_poly_type
-        )
+        atom_array = AddAtomArrayAnnot.find_equiv_mol_and_assign_ids(atom_array, self.entity_poly_type)
 
         # numerical encoding of (chain id, residue index)
         atom_array = AddAtomArrayAnnot.add_ref_space_uid(atom_array)
         atom_array = AddAtomArrayAnnot.add_ref_info_and_res_perm(atom_array)
 
         # the number of protein chains in the assembly
-        prot_label_entity_ids = [
-            k for k, v in self.entity_poly_type.items() if "polypeptide" in v
-        ]
-        num_prot_chains = len(
-            np.unique(
-                atom_array.chain_id[
-                    np.isin(atom_array.label_entity_id, prot_label_entity_ids)
-                ]
-            )
-        )
+        prot_label_entity_ids = [k for k, v in self.entity_poly_type.items() if "polypeptide" in v]
+        num_prot_chains = len(np.unique(atom_array.chain_id[np.isin(atom_array.label_entity_id, prot_label_entity_ids)]))
         bioassembly_dict["num_prot_chains"] = num_prot_chains
 
         bioassembly_dict["atom_array"] = atom_array
@@ -855,9 +792,7 @@ class MMCIFParser:
         return bioassembly_dict
 
     @staticmethod
-    def create_empty_annotation_like(
-        source_array: AtomArray, target_array: AtomArray
-    ) -> AtomArray:
+    def create_empty_annotation_like(source_array: AtomArray, target_array: AtomArray) -> AtomArray:
         """create empty annotation like source_array"""
         # create empty annotation, atom array addition only keep common annotation
         for k, v in source_array._annot.items():
@@ -906,16 +841,12 @@ class MMCIFParser:
             neighbor_idx, types = atom_array.bonds.get_bonds(idx)
             ref_neighbor_idx, types = component.bonds.get_bonds(idx_in_comp)
             # neighbor_atom only bond to central atom in CCD component
-            ref_neighbor_idx = [
-                i for i in ref_neighbor_idx if len(component.bonds.get_bonds(i)[0]) == 1
-            ]
+            ref_neighbor_idx = [i for i in ref_neighbor_idx if len(component.bonds.get_bonds(i)[0]) == 1]
             removed_mask = ~np.isin(
                 component.atom_name[ref_neighbor_idx],
                 atom_array.atom_name[neighbor_idx],
             )
-            remove_atom_names.append(
-                component.atom_name[ref_neighbor_idx][removed_mask].tolist()
-            )
+            remove_atom_names.append(component.atom_name[ref_neighbor_idx][removed_mask].tolist())
         max_id = np.argmax(map(len, remove_atom_names))
         return remove_atom_names[max_id]
 
@@ -933,9 +864,7 @@ class MMCIFParser:
             chain = struc.AtomArray(0)
             for res_id, res_name in enumerate(poly_res_names[entity_id]):
                 # keep all leaving atoms, will remove leaving atoms later in this function
-                residue = ccd.get_component_atom_array(
-                    res_name, keep_leaving_atoms=True, keep_hydrogens=False
-                )
+                residue = ccd.get_component_atom_array(res_name, keep_leaving_atoms=True, keep_hydrogens=False)
                 residue.res_id[:] = res_id + 1
                 chain += residue
             res_starts = struc.get_residue_starts(chain, add_exclusive_stop=True)
@@ -971,9 +900,7 @@ class MMCIFParser:
 
                 if bond_mask[b_idx]:
                     # keep this bond, add to central_bond_count
-                    central_atom_idx = (
-                        atom_i if chain.atom_name[atom_i] in ("C", "P") else atom_j
-                    )
+                    central_atom_idx = atom_i if chain.atom_name[atom_i] in ("C", "P") else atom_j
                     atom_key = (
                         entity_id,
                         chain.res_id[central_atom_idx],
@@ -994,10 +921,7 @@ class MMCIFParser:
         inter_residue_bonds = get_inter_residue_bonds(atom_array)
         for i in inter_residue_bonds.flat:
             bonds, types = atom_array.bonds.get_bonds(i)
-            bond_count = (
-                (atom_array.res_id[bonds] != atom_array.res_id[i])
-                | (atom_array.chain_id[bonds] != atom_array.chain_id[i])
-            ).sum()
+            bond_count = ((atom_array.res_id[bonds] != atom_array.res_id[i]) | (atom_array.chain_id[bonds] != atom_array.chain_id[i])).sum()
             atom_key = (
                 atom_array.label_entity_id[i],
                 atom_array.res_id[i],
@@ -1023,9 +947,7 @@ class MMCIFParser:
                         continue
 
                     # num of remove leaving groups equals to num of inter residue bonds (inter_bond_count)
-                    component = ccd.get_component_atom_array(
-                        res_name, keep_leaving_atoms=True
-                    )
+                    component = ccd.get_component_atom_array(res_name, keep_leaving_atoms=True)
 
                     if component.central_to_leaving_groups is None:
                         # The leaving atoms might be labeled wrongly. The residue remains as it is.
@@ -1033,9 +955,7 @@ class MMCIFParser:
 
                     # central_to_leaving_groups:dict[str, list[list[str]]], central atom name to leaving atom groups (atom names).
                     if central_atom_name in component.central_to_leaving_groups:
-                        leaving_groups = component.central_to_leaving_groups[
-                            central_atom_name
-                        ]
+                        leaving_groups = component.central_to_leaving_groups[central_atom_name]
                         # removed only when there are leaving atoms.
                         if inter_bond_count >= len(leaving_groups):
                             remove_groups = leaving_groups
@@ -1059,13 +979,9 @@ class MMCIFParser:
                                 else:
                                     not_exist_group.append(group)
                             if inter_bond_count <= len(not_exist_group):
-                                remove_groups = random.sample(
-                                    not_exist_group, inter_bond_count
-                                )
+                                remove_groups = random.sample(not_exist_group, inter_bond_count)
                             else:
-                                remove_groups = not_exist_group + random.sample(
-                                    exist_group, inter_bond_count - len(not_exist_group)
-                                )
+                                remove_groups = not_exist_group + random.sample(exist_group, inter_bond_count - len(not_exist_group))
                         names = [name for group in remove_groups for name in group]
                         remove_atom_names.extend(names)
 
@@ -1091,9 +1007,7 @@ class MMCIFParser:
         return entity_atom_array
 
     @staticmethod
-    def make_new_residue(
-        atom_array, res_start, res_stop, ref_chain=None
-    ) -> tuple[AtomArray, dict[int, int]]:
+    def make_new_residue(atom_array, res_start, res_stop, ref_chain=None) -> tuple[AtomArray, dict[int, int]]:
         """
         make new residue from atom_array[res_start:res_stop], ref_chain is the reference chain.
         1. only remove leavning atom when central atom covalent to other residue.
@@ -1166,9 +1080,7 @@ class MMCIFParser:
                     if bond_count <= len(not_exist_group):
                         remove_groups = random.sample(not_exist_group, bond_count)
                     else:
-                        remove_groups = not_exist_group + random.sample(
-                            exist_group, bond_count - len(not_exist_group)
-                        )
+                        remove_groups = not_exist_group + random.sample(exist_group, bond_count - len(not_exist_group))
             else:
                 leaving_atoms = MMCIFParser.find_non_ccd_leaving_atoms(
                     atom_array=atom_array,
@@ -1212,9 +1124,7 @@ class MMCIFParser:
             if entity_id in entity_atom_array:
                 has_ref_chain = True
                 ref_chain_array = entity_atom_array[entity_id].copy()
-                ref_chain_array = self.create_empty_annotation_like(
-                    atom_array, ref_chain_array
-                )
+                ref_chain_array = self.create_empty_annotation_like(atom_array, ref_chain_array)
 
             chain_array = None
             c_res_starts = res_starts[(c_start <= res_starts) & (res_starts <= c_stop)]
@@ -1225,10 +1135,7 @@ class MMCIFParser:
                 curr_res_id = atom_array.res_id[r_start]
                 if has_ref_chain and curr_res_id - prev_res_id > 1:
                     # missing residue in head or middle, res_id is 1-based int.
-                    segment = ref_chain_array[
-                        (prev_res_id < ref_chain_array.res_id)
-                        & (ref_chain_array.res_id < curr_res_id)
-                    ]
+                    segment = ref_chain_array[(prev_res_id < ref_chain_array.res_id) & (ref_chain_array.res_id < curr_res_id)]
                     if chain_array is None:
                         chain_array = segment
                     else:
@@ -1239,9 +1146,7 @@ class MMCIFParser:
 
                 # add missing atoms of existing residue
                 ref_chain = ref_chain_array if has_ref_chain else None
-                new_residue = self.make_new_residue(
-                    atom_array, r_start, r_stop, ref_chain
-                )
+                new_residue = self.make_new_residue(atom_array, r_start, r_stop, ref_chain)
 
                 new_residue = self.create_empty_annotation_like(atom_array, new_residue)
 
@@ -1252,9 +1157,7 @@ class MMCIFParser:
                     new_residue._annot[k][:] = v
 
                 # make o2n_amap: old to new atom map
-                name_to_index_new = {
-                    name: idx for idx, name in enumerate(new_residue.atom_name)
-                }
+                name_to_index_new = {name: idx for idx, name in enumerate(new_residue.atom_name)}
                 res_o2n_amap = {}
                 res_mismatch_idx = []
                 for old_idx in range(r_start, r_stop):
@@ -1324,9 +1227,7 @@ class MMCIFParser:
 
         # some non-leaving atoms are not in the new_array for atom name mismatch, e.g. 4msw TYF
         # only keep bonds of matching atoms
-        old_bonds = old_bonds[
-            np.isin(old_bonds[:, 0], old_idx) & np.isin(old_bonds[:, 1], old_idx)
-        ]
+        old_bonds = old_bonds[np.isin(old_bonds[:, 0], old_idx) & np.isin(old_bonds[:, 1], old_idx)]
 
         old_bonds[:, 0] = [o2n_amap[i] for i in old_bonds[:, 0]]
         old_bonds[:, 1] = [o2n_amap[i] for i in old_bonds[:, 1]]
@@ -1337,14 +1238,10 @@ class MMCIFParser:
             new_array.bonds = new_array.bonds.merge(new_bonds)
 
         # add peptide bonds and nucleic acid bonds based on CCD type
-        new_array = ccd.add_inter_residue_bonds(
-            new_array, exclude_struct_conn_pairs=True, remove_far_inter_chain_pairs=True
-        )
+        new_array = ccd.add_inter_residue_bonds(new_array, exclude_struct_conn_pairs=True, remove_far_inter_chain_pairs=True)
         return new_array
 
-    def make_chain_indices(
-        self, atom_array: AtomArray, pdb_cluster_file: Union[str, Path] = None
-    ) -> list:
+    def make_chain_indices(self, atom_array: AtomArray, pdb_cluster_file: Union[str, Path] = None) -> list:
         """
         Make chain indices.
 
@@ -1360,9 +1257,7 @@ class MMCIFParser:
         starts = struc.get_chain_starts(atom_array, add_exclusive_stop=True)
         chain_indices_list = []
 
-        is_centre_atom_and_is_resolved = (
-            atom_array.is_resolved & atom_array.centre_atom_mask.astype(bool)
-        )
+        is_centre_atom_and_is_resolved = atom_array.is_resolved & atom_array.centre_atom_mask.astype(bool)
         for start, stop in zip(starts[:-1], starts[1:]):
             chain_id = atom_array.chain_id[start]
             entity_id = atom_array.label_entity_id[start]
@@ -1416,9 +1311,7 @@ class MMCIFParser:
             chain_indices_list.append(chain_dict)
         return chain_indices_list
 
-    def make_interface_indices(
-        self, atom_array: AtomArray, chain_indices_list: list
-    ) -> list:
+    def make_interface_indices(self, atom_array: AtomArray, chain_indices_list: list) -> list:
         """make interface indices
         As described in SI 2.5.1, interfaces defined as pairs of chains with minimum heavy atom
         (i.e. non-hydrogen) separation less than 5 Å
@@ -1430,15 +1323,11 @@ class MMCIFParser:
         chain_indices_dict = {i["chain_id"]: i for i in chain_indices_list}
         interface_indices_dict = {}
 
-        cell_list = struc.CellList(
-            atom_array, cell_size=5, selection=atom_array.is_resolved
-        )
+        cell_list = struc.CellList(atom_array, cell_size=5, selection=atom_array.is_resolved)
         for chain_i, chain_i_dict in chain_indices_dict.items():
             chain_mask = atom_array.chain_id == chain_i
             coord = atom_array.coord[chain_mask & atom_array.is_resolved]
-            neighbors_indices_2d = cell_list.get_atoms(
-                coord, radius=5
-            )  # shape:(n_coord, max_n_neighbors), padding with -1
+            neighbors_indices_2d = cell_list.get_atoms(coord, radius=5)  # shape:(n_coord, max_n_neighbors), padding with -1
             neighbors_indices = np.unique(neighbors_indices_2d)
             neighbors_indices = neighbors_indices[neighbors_indices != -1]
 
@@ -1460,12 +1349,8 @@ class MMCIFParser:
                 # mol_type --> mol_1_type
                 # entity_id --> entity_1_id
                 # cluster_id --> cluster_1_id
-                interface_dict.update(
-                    {k.replace("_", "_1_"): v for k, v in chain_i_dict.items()}
-                )
-                interface_dict.update(
-                    {k.replace("_", "_2_"): v for k, v in chain_j_dict.items()}
-                )
+                interface_dict.update({k.replace("_", "_1_"): v for k, v in chain_i_dict.items()})
+                interface_dict.update({k.replace("_", "_2_"): v for k, v in chain_j_dict.items()})
                 interface_indices_dict[interface_id] = interface_dict
         return list(interface_indices_dict.values())
 
@@ -1514,25 +1399,17 @@ class MMCIFParser:
         if len(polymer_lig_bonds) == 0:
             lig_polymer_bond_chain_id = []
         else:
-            lig_polymer_bond_chain_id = atom_array.chain_id[
-                np.unique(polymer_lig_bonds[:, :2])
-            ]
+            lig_polymer_bond_chain_id = atom_array.chain_id[np.unique(polymer_lig_bonds[:, :2])]
 
         for i in ["1", "2"]:
             if indices_dict[f"entity_{i}_id"] == "":
                 indices_dict[f"sub_mol_{i}_type"] = ""
                 continue
             entity_type = indices_dict[f"mol_{i}_type"]
-            mol_id = atom_array.mol_id[
-                atom_array.label_entity_id == indices_dict[f"entity_{i}_id"]
-            ][0]
+            mol_id = atom_array.mol_id[atom_array.label_entity_id == indices_dict[f"entity_{i}_id"]][0]
             mol_all_res_name = atom_array.res_name[atom_array.mol_id == mol_id]
-            chain_all_mol_type = atom_array.mol_type[
-                atom_array.chain_id == indices_dict[f"chain_{i}_id"]
-            ]
-            chain_all_res_name = atom_array.res_name[
-                atom_array.chain_id == indices_dict[f"chain_{i}_id"]
-            ]
+            chain_all_mol_type = atom_array.mol_type[atom_array.chain_id == indices_dict[f"chain_{i}_id"]]
+            chain_all_res_name = atom_array.res_name[atom_array.chain_id == indices_dict[f"chain_{i}_id"]]
 
             if entity_type == "ligand":
                 ccd_code = indices_dict[f"cluster_{i}_id"]
@@ -1557,17 +1434,13 @@ class MMCIFParser:
 
             elif entity_type == "nuc":
                 if np.all(chain_all_mol_type == "dna"):
-                    if np.any(
-                        np.isin(chain_all_res_name, list(DNA_STD_RESIDUES.keys()))
-                    ):
+                    if np.any(np.isin(chain_all_res_name, list(DNA_STD_RESIDUES.keys()))):
                         indices_dict[f"sub_mol_{i}_type"] = "dna"
                     else:
                         indices_dict[f"sub_mol_{i}_type"] = "modified_dna"
 
                 elif np.all(chain_all_mol_type == "rna"):
-                    if np.any(
-                        np.isin(chain_all_res_name, list(RNA_STD_RESIDUES.keys()))
-                    ):
+                    if np.any(np.isin(chain_all_res_name, list(RNA_STD_RESIDUES.keys()))):
                         indices_dict[f"sub_mol_{i}_type"] = "rna"
                     else:
                         indices_dict[f"sub_mol_{i}_type"] = "modified_rna"
@@ -1628,14 +1501,10 @@ class MMCIFParser:
         """
         atom_array = bioassembly_dict["atom_array"]
         if atom_array is None:
-            print(
-                f"Warning: make_indices() input atom_array is None, return empty list (PDB Code:{bioassembly_dict['pdb_id']})"
-            )
+            print(f"Warning: make_indices() input atom_array is None, return empty list (PDB Code:{bioassembly_dict['pdb_id']})")
             return []
         chain_indices_list = self.make_chain_indices(atom_array, pdb_cluster_file)
-        interface_indices_list = self.make_interface_indices(
-            atom_array, chain_indices_list
-        )
+        interface_indices_list = self.make_interface_indices(atom_array, chain_indices_list)
         meta_dict = {
             "pdb_id": bioassembly_dict["pdb_id"],
             "assembly_id": bioassembly_dict["assembly_id"],
@@ -1647,9 +1516,7 @@ class MMCIFParser:
         sample_indices_list = []
         for chain_dict in chain_indices_list:
             chain_dict_out = {k.replace("_", "_1_"): v for k, v in chain_dict.items()}
-            chain_dict_out.update(
-                {k.replace("_", "_2_"): "" for k, v in chain_dict.items()}
-            )
+            chain_dict_out.update({k.replace("_", "_2_"): "" for k, v in chain_dict.items()})
             chain_dict_out["cluster_id"] = chain_dict["cluster_id"]
             chain_dict_out.update(meta_dict)
             chain_dict_out["type"] = "chain"
@@ -1677,9 +1544,7 @@ class MMCIFParser:
             if indices["type"] == "chain":
                 indices["mol_type_group"] = f'intra_{indices["mol_1_type"]}'
             else:
-                indices["mol_type_group"] = "_".join(
-                    sorted([indices["mol_1_type"], indices["mol_2_type"]])
-                )
+                indices["mol_type_group"] = "_".join(sorted([indices["mol_1_type"], indices["mol_2_type"]]))
             indices = self.add_sub_mol_type(atom_array, indices)
             indices = self.add_eval_type(indices)
         return sample_indices_list
@@ -1721,9 +1586,7 @@ class DistillationMMCIFParser(MMCIFParser):
                 # no atoms left
                 return structure_dict
 
-        atom_array = AddAtomArrayAnnot.add_token_mol_type(
-            atom_array, self.entity_poly_type
-        )
+        atom_array = AddAtomArrayAnnot.add_token_mol_type(atom_array, self.entity_poly_type)
         atom_array = AddAtomArrayAnnot.add_centre_atom_mask(atom_array)
         atom_array = AddAtomArrayAnnot.add_atom_mol_type_mask(atom_array)
         atom_array = AddAtomArrayAnnot.add_distogram_rep_atom_mask(atom_array)
@@ -1731,32 +1594,19 @@ class DistillationMMCIFParser(MMCIFParser):
         atom_array = AddAtomArrayAnnot.add_cano_seq_resname(atom_array)
         atom_array = AddAtomArrayAnnot.add_tokatom_idx(atom_array)
         atom_array = AddAtomArrayAnnot.add_modified_res_mask(atom_array)
-        assert (
-            atom_array.centre_atom_mask.sum()
-            == atom_array.distogram_rep_atom_mask.sum()
-        )
+        assert atom_array.centre_atom_mask.sum() == atom_array.distogram_rep_atom_mask.sum()
 
         # rename chain_ids from A A B to A0 A1 B0 and add asym_id_int, entity_id_int, sym_id_int
         atom_array = AddAtomArrayAnnot.unique_chain_and_add_ids(atom_array)
-        atom_array = AddAtomArrayAnnot.find_equiv_mol_and_assign_ids(
-            atom_array, self.entity_poly_type
-        )
+        atom_array = AddAtomArrayAnnot.find_equiv_mol_and_assign_ids(atom_array, self.entity_poly_type)
 
         # numerical encoding of (chain id, residue index)
         atom_array = AddAtomArrayAnnot.add_ref_space_uid(atom_array)
         atom_array = AddAtomArrayAnnot.add_ref_info_and_res_perm(atom_array)
 
         # the number of protein chains in the structure
-        prot_label_entity_ids = [
-            k for k, v in self.entity_poly_type.items() if "polypeptide" in v
-        ]
-        num_prot_chains = len(
-            np.unique(
-                atom_array.chain_id[
-                    np.isin(atom_array.label_entity_id, prot_label_entity_ids)
-                ]
-            )
-        )
+        prot_label_entity_ids = [k for k, v in self.entity_poly_type.items() if "polypeptide" in v]
+        num_prot_chains = len(np.unique(atom_array.chain_id[np.isin(atom_array.label_entity_id, prot_label_entity_ids)]))
         structure_dict["num_prot_chains"] = num_prot_chains
         structure_dict["atom_array"] = atom_array
         structure_dict["num_tokens"] = atom_array.centre_atom_mask.sum()
@@ -1770,9 +1620,7 @@ class AddAtomArrayAnnot(object):
     """
 
     @staticmethod
-    def add_token_mol_type(
-        atom_array: AtomArray, sequences: dict[str, str]
-    ) -> AtomArray:
+    def add_token_mol_type(atom_array: AtomArray, sequences: dict[str, str]) -> AtomArray:
         """
         Add molecule types in atom_arry.mol_type based on ccd pdbx_type.
 
@@ -1877,16 +1725,12 @@ class AddAtomArrayAnnot(object):
             AtomArray: Biotite AtomArray object with "centre_atom_mask" annotation added.
         """
         res_name = list(STD_RESIDUES.keys())
-        std_res = np.isin(atom_array.res_name, res_name) & (
-            atom_array.mol_type != "ligand"
-        )
+        std_res = np.isin(atom_array.res_name, res_name) & (atom_array.mol_type != "ligand")
         prot_res = np.char.str_len(atom_array.res_name) == 3
         prot_centre_atom = prot_res & (atom_array.atom_name == "CA")
         nuc_centre_atom = (~prot_res) & (atom_array.atom_name == r"C1'")
         not_std_res = ~std_res
-        centre_atom_mask = (
-            std_res & (prot_centre_atom | nuc_centre_atom)
-        ) | not_std_res
+        centre_atom_mask = (std_res & (prot_centre_atom | nuc_centre_atom)) | not_std_res
         centre_atom_mask = centre_atom_mask.astype(int)
         atom_array.set_annotation("centre_atom_mask", centre_atom_mask)
         return atom_array
@@ -1910,9 +1754,7 @@ class AddAtomArrayAnnot(object):
         Returns:
             AtomArray: Biotite AtomArray object with "distogram_rep_atom_mask" annotation added.
         """
-        std_res = np.isin(atom_array.res_name, list(STD_RESIDUES.keys())) & (
-            atom_array.mol_type != "ligand"
-        )
+        std_res = np.isin(atom_array.res_name, list(STD_RESIDUES.keys())) & (atom_array.mol_type != "ligand")
 
         # for protein std res
         std_prot_res = std_res & (np.char.str_len(atom_array.res_name) == 3)
@@ -1921,28 +1763,18 @@ class AddAtomArrayAnnot(object):
         prot_gly_ca = gly & (atom_array.atom_name == "CA")
 
         # for nucleotide std res
-        purines_c4 = np.isin(atom_array.res_name, ["DA", "DG", "A", "G"]) & (
-            atom_array.atom_name == "C4"
-        )
-        pyrimidines_c2 = np.isin(atom_array.res_name, ["DC", "DT", "C", "U"]) & (
-            atom_array.atom_name == "C2"
-        )
+        purines_c4 = np.isin(atom_array.res_name, ["DA", "DG", "A", "G"]) & (atom_array.atom_name == "C4")
+        pyrimidines_c2 = np.isin(atom_array.res_name, ["DC", "DT", "C", "U"]) & (atom_array.atom_name == "C2")
 
         # for nucleotide unk res
-        unk_nuc = np.isin(atom_array.res_name, ["DN", "N"]) & (
-            atom_array.atom_name == r"C1'"
-        )
+        unk_nuc = np.isin(atom_array.res_name, ["DN", "N"]) & (atom_array.atom_name == r"C1'")
 
-        distogram_rep_atom_mask = (
-            prot_cb | prot_gly_ca | purines_c4 | pyrimidines_c2 | unk_nuc
-        ) | (~std_res)
+        distogram_rep_atom_mask = (prot_cb | prot_gly_ca | purines_c4 | pyrimidines_c2 | unk_nuc) | (~std_res)
         distogram_rep_atom_mask = distogram_rep_atom_mask.astype(int)
 
         atom_array.set_annotation("distogram_rep_atom_mask", distogram_rep_atom_mask)
 
-        assert np.sum(atom_array.distogram_rep_atom_mask) == np.sum(
-            atom_array.centre_atom_mask
-        )
+        assert np.sum(atom_array.distogram_rep_atom_mask) == np.sum(atom_array.centre_atom_mask)
 
         return atom_array
 
@@ -1963,9 +1795,7 @@ class AddAtomArrayAnnot(object):
         Returns:
             AtomArray: Biotite AtomArray object with "plddt_m_rep_atom_mask" annotation added.
         """
-        std_res = np.isin(atom_array.res_name, list(STD_RESIDUES.keys())) & (
-            atom_array.mol_type != "ligand"
-        )
+        std_res = np.isin(atom_array.res_name, list(STD_RESIDUES.keys())) & (atom_array.mol_type != "ligand")
         ca_or_c1 = (atom_array.atom_name == "CA") | (atom_array.atom_name == r"C1'")
         plddt_m_rep_atom_mask = (std_res & ca_or_c1).astype(int)
         atom_array.set_annotation("plddt_m_rep_atom_mask", plddt_m_rep_atom_mask)
@@ -1993,9 +1823,7 @@ class AddAtomArrayAnnot(object):
             asym_id_int, res_id = chain_res_id_pair
             mapping_dict[(asym_id_int, res_id)] = idx
 
-        ref_space_uid = [
-            mapping_dict[(asym_id_int, res_id)] for asym_id_int, res_id in chain_res_id
-        ]
+        ref_space_uid = [mapping_dict[(asym_id_int, res_id)] for asym_id_int, res_id in chain_res_id]
         atom_array.set_annotation("ref_space_uid", ref_space_uid)
         return atom_array
 
@@ -2028,9 +1856,7 @@ class AddAtomArrayAnnot(object):
                 one_letter_code = "X" if mol_type == "protein" else "N"
 
             if mol_type == "protein":
-                res_name_in_cano_seq = PROT_STD_RESIDUES_ONE_TO_THREE.get(
-                    one_letter_code, "UNK"
-                )
+                res_name_in_cano_seq = PROT_STD_RESIDUES_ONE_TO_THREE.get(one_letter_code, "UNK")
             elif mol_type == "dna":
                 res_name_in_cano_seq = "D" + one_letter_code
                 if res_name_in_cano_seq not in DNA_STD_RESIDUES:
@@ -2049,9 +1875,7 @@ class AddAtomArrayAnnot(object):
         return atom_array
 
     @staticmethod
-    def remove_bonds_between_polymer_chains(
-        atom_array: AtomArray, entity_poly_type: dict[str, str]
-    ) -> struc.BondList:
+    def remove_bonds_between_polymer_chains(atom_array: AtomArray, entity_poly_type: dict[str, str]) -> struc.BondList:
         """
         Remove bonds between polymer chains based on entity_poly_type
 
@@ -2063,9 +1887,7 @@ class AddAtomArrayAnnot(object):
             BondList: Biotite BondList object (copy) with bonds between polymer chains removed
         """
         copy = atom_array.bonds.copy()
-        polymer_mask = np.isin(
-            atom_array.label_entity_id, list(entity_poly_type.keys())
-        )
+        polymer_mask = np.isin(atom_array.label_entity_id, list(entity_poly_type.keys()))
         i = copy._bonds[:, 0]
         j = copy._bonds[:, 1]
         pp_bond_mask = polymer_mask[i] & polymer_mask[j]
@@ -2107,9 +1929,7 @@ class AddAtomArrayAnnot(object):
         if entity_poly_type is None:
             mol_indices: list[np.ndarray] = get_molecule_indices(atom_array)
         else:
-            bonds_filtered = AddAtomArrayAnnot.remove_bonds_between_polymer_chains(
-                atom_array, entity_poly_type
-            )
+            bonds_filtered = AddAtomArrayAnnot.remove_bonds_between_polymer_chains(atom_array, entity_poly_type)
             mol_indices: list[np.ndarray] = get_molecule_indices(bonds_filtered)
 
         # assign mol_id
@@ -2119,9 +1939,7 @@ class AddAtomArrayAnnot(object):
         atom_array.set_annotation("mol_id", mol_ids)
 
         assert ~np.isin(-1, atom_array.mol_id), "Some mol_id is not assigned."
-        assert len(np.unique(atom_array.mol_id)) == len(
-            mol_indices
-        ), "Some mol_id is duplicated."
+        assert len(np.unique(atom_array.mol_id)) == len(mol_indices), "Some mol_id is duplicated."
 
         # assign entity_mol_id
         # --------------------
@@ -2134,18 +1952,14 @@ class AddAtomArrayAnnot(object):
         for mol_id, atom_indices in enumerate(mol_indices):
             atom_indices = np.sort(atom_indices)
             # keep multiple chains-mol has same chain order in different copies
-            chain_perm = np.argsort(
-                atom_array.label_entity_id[atom_indices], kind="stable"
-            )
+            chain_perm = np.argsort(atom_array.label_entity_id[atom_indices], kind="stable")
             atom_indices = atom_indices[chain_perm]
             # save indices for finally re-ordering atom_array
             new_atom_perm.extend(atom_indices)
 
             # check mol equal, keep chain order consistent with atom_indices
             mol_chain_mask = np.isin(atom_indices, chain_starts)
-            entity_ids = atom_array.label_entity_id[atom_indices][
-                mol_chain_mask
-            ].tolist()
+            entity_ids = atom_array.label_entity_id[atom_indices][mol_chain_mask].tolist()
 
             match_entity_mol_id = None
             for entity_mol_id, mol_info in enumerate(ref_mol_infos):
@@ -2157,16 +1971,12 @@ class AddAtomArrayAnnot(object):
                 if len(atom_indices) != len(mol_info.atom_name):
                     continue
 
-                atom_name_not_equal = (
-                    atom_array.atom_name[atom_indices] != mol_info.atom_name
-                )
+                atom_name_not_equal = atom_array.atom_name[atom_indices] != mol_info.atom_name
                 if np.any(atom_name_not_equal):
                     diff_indices = np.where(atom_name_not_equal)[0]
                     query_atom = atom_array[atom_indices[diff_indices[0]]]
                     ref_atom = atom_array[mol_info.atom_indices[diff_indices[0]]]
-                    logger.warning(
-                        f"Two mols have entity_ids and same number of atoms, but diff atom name:\n{query_atom=}\n{  ref_atom=}"
-                    )
+                    logger.warning(f"Two mols have entity_ids and same number of atoms, but diff atom name:\n{query_atom=}\n{  ref_atom=}")
                     continue
 
                 # pass all checks, it is a match
@@ -2191,9 +2001,7 @@ class AddAtomArrayAnnot(object):
         atom_array = atom_array[new_atom_perm]
 
         # assign mol_atom_index
-        mol_starts = get_starts_by(
-            atom_array, by_annot="mol_id", add_exclusive_stop=True
-        )
+        mol_starts = get_starts_by(atom_array, by_annot="mol_id", add_exclusive_stop=True)
         mol_atom_index = np.zeros_like(atom_array.mol_id, dtype=np.int32)
         for start, stop in zip(mol_starts[:-1], mol_starts[1:]):
             mol_atom_index[start:stop] = np.arange(stop - start)
@@ -2206,17 +2014,12 @@ class AddAtomArrayAnnot(object):
                 for j in range(i + 1, num_mols):
                     start_i, stop_i = mol_starts[i], mol_starts[i + 1]
                     start_j, stop_j = mol_starts[j], mol_starts[j + 1]
-                    if (
-                        atom_array.entity_mol_id[start_i]
-                        != atom_array.entity_mol_id[start_j]
-                    ):
+                    if atom_array.entity_mol_id[start_i] != atom_array.entity_mol_id[start_j]:
                         continue
                     for key in ["res_name", "atom_name", "mol_atom_index"]:
                         # not check res_id for ligand may have different res_id
                         annot = getattr(atom_array, key)
-                        assert np.all(
-                            annot[start_i:stop_i] == annot[start_j:stop_j]
-                        ), f"not equal {key} when find_equiv_mol_and_assign_ids()"
+                        assert np.all(annot[start_i:stop_i] == annot[start_j:stop_j]), f"not equal {key} when find_equiv_mol_and_assign_ids()"
 
         return atom_array
 
@@ -2346,9 +2149,7 @@ class AddAtomArrayAnnot(object):
             # create ref conformer for each CCD ID
             ref_result = get_ccd_ref_info(ccd_id)
             if ref_result:
-                for space_uid in np.unique(
-                    atom_array[atom_array.res_name == ccd_id].ref_space_uid
-                ):
+                for space_uid in np.unique(atom_array[atom_array.res_name == ccd_id].ref_space_uid):
                     if ref_result:
                         info_dict[space_uid] = [
                             ref_result["atom_map"],
@@ -2408,30 +2209,19 @@ class AddAtomArrayAnnot(object):
                 continue
 
             perm_array = res_dict["perm"]  # [N_atoms, N_perm]
-            perm_atom_idx_in_res_order = [
-                res_dict["atom_map"][i] for i in res_atom.atom_name
-            ]
-            perm_idx_to_present_atom_idx = dict(
-                zip(perm_atom_idx_in_res_order, curr_res_atom_idx)
-            )
+            perm_atom_idx_in_res_order = [res_dict["atom_map"][i] for i in res_atom.atom_name]
+            perm_idx_to_present_atom_idx = dict(zip(perm_atom_idx_in_res_order, curr_res_atom_idx))
 
             precent_row_mask = np.isin(perm_array[:, 0], perm_atom_idx_in_res_order)
             perm_array_row_filtered = perm_array[precent_row_mask]
 
-            precent_col_mask = np.isin(
-                perm_array_row_filtered, perm_atom_idx_in_res_order
-            ).all(axis=0)
+            precent_col_mask = np.isin(perm_array_row_filtered, perm_atom_idx_in_res_order).all(axis=0)
             perm_array_filtered = perm_array_row_filtered[:, precent_col_mask]
 
             # replace the elem in new_perm_array according to the perm_idx_to_present_atom_idx dict
-            new_perm_array = np.vectorize(perm_idx_to_present_atom_idx.get)(
-                perm_array_filtered
-            )
+            new_perm_array = np.vectorize(perm_idx_to_present_atom_idx.get)(perm_array_filtered)
 
-            assert (
-                new_perm_array.shape[1] <= 1000
-                and new_perm_array.shape[1] <= perm_array.shape[1]
-            )
+            assert new_perm_array.shape[1] <= 1000 and new_perm_array.shape[1] <= perm_array.shape[1]
             res_perm.extend(new_perm_array.tolist())
         return res_perm
 
@@ -2453,13 +2243,7 @@ class AddAtomArrayAnnot(object):
         for i in res_perm:
             str_res_perm.append("_".join([str(j) for j in i]))
 
-        assert (
-            len(atom_array)
-            == len(ref_pos)
-            == len(ref_charge)
-            == len(ref_mask)
-            == len(res_perm)
-        ), f"{len(atom_array)=}, {len(ref_pos)=}, {len(ref_charge)=}, {len(ref_mask)=}, {len(str_res_perm)=}"
+        assert len(atom_array) == len(ref_pos) == len(ref_charge) == len(ref_mask) == len(res_perm), f"{len(atom_array)=}, {len(ref_pos)=}, {len(ref_charge)=}, {len(ref_mask)=}, {len(str_res_perm)=}"
 
         atom_array.set_annotation("ref_pos", ref_pos)
         atom_array.set_annotation("ref_charge", ref_charge)

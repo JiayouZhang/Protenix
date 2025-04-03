@@ -113,7 +113,7 @@ if (not os.path.exists(CCD_COMPONENTS_FILE_PATH)) or (
         )
 
 data_configs = {
-    "num_dl_workers": 16,
+    "num_dl_workers": 0, #############16, # debug
     "epoch_size": 10000,
     "train_ref_pos_augment": True,
     "test_ref_pos_augment": True,
@@ -123,6 +123,22 @@ data_configs = {
         "sampler_type": "weighted",
     },
     "test_sets": ListValue(["recentPDB_1536_sample384_0925"]),
+    "kaggle_train": {
+        "base_info": {
+            "mmcif_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp",
+            "bioassembly_dict_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp3",
+            "indices_fpath":"/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp2/train.csv",
+            "pdb_list": "",
+            "random_sample_if_failed": False, #True, ###### debug
+            "max_n_token": -1,  # can be used for removing data with too many tokens.
+            "use_reference_chains_only": False,
+            "exclusion": {  # do not sample the data based on ions.
+                "mol_1_type": ListValue(["ions"]),
+                "mol_2_type": ListValue(["ions"]),
+            },
+        },
+        **deepcopy(default_weighted_pdb_configs),
+    },
     "weightedPDB_before2109_wopb_nometalc_0925": {
         "base_info": {
             "mmcif_dir": os.path.join(DATA_ROOT_DIR, "mmcif"),
@@ -141,6 +157,20 @@ data_configs = {
             },
         },
         **deepcopy(default_weighted_pdb_configs),
+    },
+    "kaggle_test": {
+        "base_info": {
+            # same as train (for now)
+            "mmcif_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp",
+            "bioassembly_dict_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp3",
+            "indices_fpath":"/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp2/train.csv",
+            "pdb_list": "",
+            "max_n_token": GlobalConfigValue("test_max_n_token"),  # filter data
+            "sort_by_n_token": False,
+            "group_by_pdb_id": True,
+            "find_eval_chain_interface": True,
+        },
+        **deepcopy(default_test_configs),
     },
     "recentPDB_1536_sample384_0925": {
         "base_info": {

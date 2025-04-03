@@ -305,6 +305,11 @@ class CIFWriter:
         self.entity_poly_type = entity_poly_type
 
     def _get_entity_poly_and_entity_poly_seq_block(self):
+        if "entity_poly" in self.entity_poly_type and "entity_poly_seq" in self.entity_poly_type:
+            return {
+                "entity_poly": self.entity_poly_type["entity_poly"],
+                "entity_poly_seq": self.entity_poly_type["entity_poly_seq"],
+            }
         entity_poly = defaultdict(list)
         for entity_id, entity_type in self.entity_poly_type.items():
             label_asym_ids = np.unique(
