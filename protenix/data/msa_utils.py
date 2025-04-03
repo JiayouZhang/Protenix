@@ -1088,7 +1088,6 @@ def correct_rna_msa_restypes(
     np_example["msa"] = np_example["msa"].astype(np.int32)
 
     seq_len, profile_dim = np_example["profile"].shape
-    print(seq_len, profile_dim, len(RNA_NEW_ORDER_LIST))
     assert profile_dim == len(RNA_NEW_ORDER_LIST)
     profile = np.zeros((seq_len, 32))
     profile[:, np.array(RNA_NEW_ORDER_LIST)] = np_example["profile"]
