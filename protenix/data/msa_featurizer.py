@@ -589,7 +589,7 @@ class RNAMSAFeaturizer(BaseMSAFeaturizer):
         """
         if KAGGLE:
             if sequence in QUERY_TO_PATH:
-                rna_msa_paths = QUERY_TO_PATH[sequence]
+                rna_msa_paths = [QUERY_TO_PATH[sequence]]
                 seq_limits = [-1] # -1 means no limit
             else:
                 logger.warning(f"no msa for {sequence}.")
