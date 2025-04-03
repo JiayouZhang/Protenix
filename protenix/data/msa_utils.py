@@ -69,6 +69,8 @@ except ImportError:
         "Failed to import packages for searching MSA; can only run with precomputed MSA"
     )
 
+KAGGLE = True
+
 logger = logging.getLogger(__name__)
 FeatureDict = MutableMapping[str, np.ndarray]
 
@@ -469,6 +471,8 @@ def parse_rna_msa_data(
     Returns:
         Dict[str, parsers.Msa]: MSAs parsed from each file
     """
+    if KAGGLE:
+        return parse_prot_msa_data(raw_msa_paths, seq_limits)
     msa_data = {}
     for path, seq_limit in zip(raw_msa_paths, seq_limits):
         name_to_sequence = parse_sto(path)
