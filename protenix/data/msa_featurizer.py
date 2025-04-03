@@ -600,7 +600,7 @@ class RNAMSAFeaturizer(BaseMSAFeaturizer):
                 sequence=sequence,
                 raw_msa_paths=rna_msa_paths,
                 seq_limits=seq_limits,
-                msa_entity_type="prot",
+                msa_entity_type="rna",
                 msa_type="non_pairing",
             )
             return sequence_features
