@@ -125,9 +125,9 @@ data_configs = {
     "test_sets": ListValue(["recentPDB_1536_sample384_0925"]),
     "kaggle_train": {
         "base_info": {
-            "mmcif_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp",
-            "bioassembly_dict_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp3",
-            "indices_fpath":"/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp2/train.csv",
+            "mmcif_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
+            "bioassembly_dict_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
+            "indices_fpath":"/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data/train.csv",
             "pdb_list": "",
             "random_sample_if_failed": False, #True, ###### debug
             "max_n_token": -1,  # can be used for removing data with too many tokens.
@@ -161,9 +161,9 @@ data_configs = {
     "kaggle_test": {
         "base_info": {
             # same as train (for now)
-            "mmcif_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp",
-            "bioassembly_dict_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp3",
-            "indices_fpath":"/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2/tmp2/train.csv",
+            "mmcif_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
+            "bioassembly_dict_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
+            "indices_fpath":"/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data/train.csv",
             "pdb_list": "",
             "max_n_token": GlobalConfigValue("test_max_n_token"),  # filter data
             "sort_by_n_token": False,
