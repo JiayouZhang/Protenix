@@ -43,6 +43,7 @@ class DataPipeline(object):
         mmcif: Union[str, Path],
         pdb_cluster_file: Union[str, Path, None] = None,
         dataset: str = "WeightedPDB",
+        overwrite_pdb_name: str = None,
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
         """
         Get raw data from mmcif with tokenizer and a list of chains and interfaces for sampling.
@@ -68,6 +69,9 @@ class DataPipeline(object):
                 raise NotImplementedError(
                     'Unsupported "dataset", please input either "WeightedPDB" or "Distillation".'
                 )
+
+            if overwrite_pdb_name is not None:
+                bioassembly_dict["pdb_id"] = overwrite_pdb_name
 
             sample_indices_list = parser.make_indices(
                 bioassembly_dict=bioassembly_dict, pdb_cluster_file=pdb_cluster_file

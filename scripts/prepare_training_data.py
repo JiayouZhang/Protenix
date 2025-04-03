@@ -50,17 +50,18 @@ def gen_a_bioassembly_data(
     else:
         dataset = "WeightedPDB"
 
-    sample_indices_list, bioassembly_dict = DataPipeline.get_data_from_mmcif(
-        mmcif, cluster_file, dataset
-    )
+    if KAGGLE:
+        sample_indices_list, bioassembly_dict = DataPipeline.get_data_from_mmcif(
+            mmcif, cluster_file, dataset, overwrite_pdb_name=mmcif.stem.split(".")[0]
+        )
+    else:
+        sample_indices_list, bioassembly_dict = DataPipeline.get_data_from_mmcif(
+            mmcif, cluster_file, dataset
+        )
 
     if sample_indices_list and bioassembly_dict:
         pdb_id = bioassembly_dict["pdb_id"]
-        # save to output dir
-        if KAGGLE:
-            dump_gzip_pickle(bioassembly_dict, bioassembly_output_dir / (mmcif.stem.split(".")[0] + ".pkl.gz"))
-        else:
-            dump_gzip_pickle(bioassembly_dict, bioassembly_output_dir / f"{pdb_id}.pkl.gz")
+        dump_gzip_pickle(bioassembly_dict, bioassembly_output_dir / f"{pdb_id}.pkl.gz")
         return sample_indices_list
 
 
