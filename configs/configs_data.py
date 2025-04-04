@@ -163,7 +163,7 @@ data_configs = {
             # same as train (for now)
             "mmcif_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
             "bioassembly_dict_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
-            "indices_fpath":"/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data/train.csv",
+            "indices_fpath":"/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data_test/test.csv",
             "pdb_list": "",
             "max_n_token": GlobalConfigValue("test_max_n_token"),  # filter data
             "sort_by_n_token": False,
