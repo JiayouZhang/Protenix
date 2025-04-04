@@ -592,7 +592,7 @@ class RNAMSAFeaturizer(BaseMSAFeaturizer):
                 rna_msa_paths = [QUERY_TO_PATH[sequence]]
                 seq_limits = [-1] # -1 means no limit
             else:
-                logger.warning(f"no msa for {sequence}.")
+                # logger.warning(f"no msa for {sequence}.")  # disable for now since too many no msa
                 rna_msa_paths = []
                 seq_limits = []
             sequence_features = process_single_sequence(
