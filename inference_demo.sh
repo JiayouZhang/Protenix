@@ -20,7 +20,7 @@ N_step=200
 N_cycle=10
 seed=101
 # use_deepspeed_evo_attention=true
-input_json_path="./examples/rna.json"
+input_json_path="./examples/test.json"
 dump_dir="./output"
 
 python3 runner/inference.py \

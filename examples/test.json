@@ -1,0 +1,134 @@
+[
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGGGGCCACAGCAGAAGCGUUCACGUCGCAGCCCCUGUCAGCCAUUGCACUCCGGCUGCGAAUUCUGCU",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1107"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGGGGCCACAGCAGAAGCGUUCACGUCGCGGCCCCUGUCAGCCAUUGCACUCCGGCUGCGAAUUCUGCU",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1108"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "CGCCCGGAUAGCUCAGUCGGUAGAGCAGCGGCUAAAACAGCUCUGGGGUUGUACCCACCCCAGAGGCCCACGUGGCGGCUAGUACUCCGGUAUUGCGGUACCCUUGUACGCCUGUUUUAGCCGCGGGUCCAGGGUUCAAGUCCCUGUUCGGGCGCCA",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1116"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "UUGGGUUCCCUCACCCCAAUCAUAAAAAGG",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1117v2"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGAAUCUCGCCCGAUGUUCGCAUCGGGAUUUGCAGGUCCAUGGAUUACACCAUGCAACGCAGACCUGUAGAUGCCACGCUAGCCGUGGUGAGGGUCGGGUCCAGAUGUCAUUCGACUUUAACGCGCCUAAGCGUUGAAGGCGUGUUAGAGCAGAUAGUUCGCUAUCUGGGGAGCCUGUUCGCAGGCUCAGGAGCCUUCGGGCUCCUAGCGCUAUUACCCCGGACACCACCGGGCAGACAAGUAAUGGUGCUCCUCGAAUGACUUCUGUUGAGUAGAGUGUGGGCUCCGCGGCUAGUGUGCACCUUAGCGGUGAAUGUCUGACACCGUUAAGGUGGUUACUCUUCGGAGUAACGCCGAGAUUCC",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1126"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGAAUAUCGUCAUGGUGAUUCGUCACCAUGAGGCUAGAUCUCAUAUCUAGCGCUUUCGAGCGCUAGAGUCCUUAUCUAGCCGGUUUAUACUUUCGAGUGUGAACCCGAUAUUCCGCGGAUCACUAUGAGUCGUUCGCGGCUCAUAGUCCGGCUCAAAGGACAUCAUGGCCUGUUCGCAGGUUGUGAUUAUGAGUGAGCCGGGUAAGGCAUACCGUUCGCGGUAUGUCUUACGAUCCGC",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1128"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGAUACGUCUACGCUCAGUGACGGACUCUCUUCGGAGAGUCUGACAUCCGAACCAUACACGGAUGUGCCUCGCCGAACAGUCUACGGCGAGCUUAAGCGCUGGGGACGCCCAACGCAUCACAAAGACUGAGUGAUGAACCAGAAGUAUGGACUGGUUGCGUUGGUGGAGACGGUCGGGUCCAGUUCGCUGUCGAGUAGAGUGUGGGCUCCAUCGACGCCGCUUUAAGGUCCCCAAUCGUGGCGUGUCGGCCUGCUUCGGCAGGCACUGGCGCCGGGACCUUGAAGAGAUGAGAUUUCGAUCUCAUCUUUGGGUGUCUCUGGUGCUUGAGGGCCCUGUGUUCGCACAGGGCCGCUCACUGGGUGUGGACGUAUCC",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1136"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGGAGAGUACUAUUCAGAUGCAGACCGCAAGUUCAGAGCGGUUUGCAUCUAGGGUACGUUUUCGAACGUAUCCUCCGACUAAGUGUAUUCGUAUACUUAGUGCCUUGUGCCUGCUUCGGCAGGCAUGACCCAAAUGUGCCUUUCGGGGCACAUUUCCGGUCAUCCAAGUUCGCUUGGGUGAUGCGGGCGUAUAGGUUCGUCUAUACGUCCGCGUUUUCCGAGAAGAGGUAACUCGGGAAACCGGUCCACGUGACAAAGGUAGAGUUACGUGGAGGGAGCAGCUGCAAAGGGAUAAUGCAGUUGCUGGCUGGAUGCCAGAACUCACGACUGGCAUCUACGGGGAUGGUGCUCUCCCAAUUCUCCAUUUACCGCCGAAUCGACCCCAACGUGAGAGGGGUCGGUUCCCCGAGCAUAGACCAAUAUCCCAGGUUUAUGCUCCCCAACGCUGGACGAACUACCUACGUCUAGCGUUCCGGCAAAUGAGUCAAUACCUCAGACUUAUUUGCGGUGCCUGAGCCUAAACUGAACAUGGGUUCAGGCAUCUUGGCUCCAGUUCGCUGGAGCCGACGGUAGCGCUGCGUUCGCGCAGUGCUAGGGAGCAUCCGUUUUCGAGCGGAUGCUGGGCGGUUGCCUGUUCGCAGGCAAUCGGGCCUACUCAUGAUUCGUCAUGAGUGGUGACAGCGUGAUGUUCGCAUUACGCUGUCGGGUAGAUGGAGAAUU",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1138"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGACACGAGUAACUCGUCUAUCUUCUGCAGGCUGCUUACGGUUUCGUCCGUGUUGCAGCCGAUCAUCAGCACAUCUAGGUUUCGUCCGGGUGUGACCGAAAGGUAAGAUGGAGAGCCUUGUCCC",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1149"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGAGCAUCGUGUCUCAAGUGCUUCACGGUCACAAUAUACCGUUUCGUCGGGUGCGUGGCAAUUCGGUGCACAUCAUGUCUUUCGUGGCUGGUGUGGCUCCUCAAGGUGCGAGGGGCAAGUAUAGAGCAGAGCUCC",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1156"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GCGUACAGGGAACACGCAACCCCGAAGGAUCGGGGAAGGGACGUCGCCAGGGAGGCGAUUCCAUCAGGAUGAUGACGAGGGACUGAAGAGUGGGCGGGGUAAUACCCCGCCCCUUUUU",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1189"
+    },
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GCGUACAGGGAACACGCAACCCCGAAGGAUCGGGGAAGGGACGUCGCCAGGGAGGCGAUUCCAUCAGGAUGAUGACGAGGGACUGAAGAGUGGGCGGGGUAAUACCCCGCCCCUUUUU",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1190"
+    }
+]
