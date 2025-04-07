@@ -1,0 +1,13 @@
+[
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGGGGCCACAGCAGAAGCGUUCACGUCGCAGCCCCUGUCAGCCAUUGCACUCCGGCUGCGAAUUCUGCU",
+                    "count": 1
+                }
+            }
+        ],
+        "name": "R1107"
+    }
+]

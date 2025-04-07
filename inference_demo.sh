@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-export LAYERNORM_TYPE=fast_layernorm
-export USE_DEEPSPEED_EVO_ATTTENTION=true
+# export LAYERNORM_TYPE=fast_layernorm
+# export USE_DEEPSPEED_EVO_ATTTENTION=true
 
 N_sample=5
 N_step=200
 N_cycle=10
 seed=101
-use_deepspeed_evo_attention=true
-input_json_path="./examples/example.json"
+# use_deepspeed_evo_attention=true
+input_json_path="./examples/rna.json"
 dump_dir="./output"
 
 python3 runner/inference.py \

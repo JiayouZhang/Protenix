@@ -60,6 +60,31 @@ default_weighted_pdb_configs = {
     "shuffle_sym_ids": GlobalConfigValue("train_shuffle_sym_ids"),
 }
 
+kaggle_weighted_pdb_configs = {
+    "sampler_configs": {
+        "sampler_type": "weighted",
+        "beta_dict": {
+            "chain": 1,
+            "interface": 0,
+        },
+        "alpha_dict": { 
+            "prot": 0,
+            "nuc": 1,
+            "ligand": 0,
+        },
+        "force_recompute_weight": True,
+    },
+    "cropping_configs": {
+        "method_weights": ListValue([0.25, 0.75, 0.0]),
+        "crop_size": GlobalConfigValue("train_crop_size"),
+    },
+    "sample_weight": 1,
+    "limits": -1,   # limit number of samples in the dataset
+    "lig_atom_rename": GlobalConfigValue("train_lig_atom_rename"),
+    "shuffle_mols": GlobalConfigValue("train_shuffle_mols"),
+    "shuffle_sym_ids": GlobalConfigValue("train_shuffle_sym_ids"),
+}
+
 DATA_ROOT_DIR = "/af3-dev/release_data/"
 
 # Use CCD cache created by scripts/gen_ccd_cache.py priority. (without date in filename)
@@ -117,47 +142,47 @@ data_configs = {
     "epoch_size": 10000,
     "train_ref_pos_augment": True,
     "test_ref_pos_augment": True,
-    "train_sets": ListValue(["weightedPDB_before2109_wopb_nometalc_0925"]),
+    "train_sets": ListValue(["kaggle_train"]),
     "train_sampler": {
         "train_sample_weights": ListValue([1.0]),
         "sampler_type": "weighted",
     },
-    "test_sets": ListValue(["recentPDB_1536_sample384_0925"]),
+    "test_sets": ListValue(["kaggle_test"]),
     "kaggle_train": {
         "base_info": {
-            "mmcif_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
-            "bioassembly_dict_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
-            "indices_fpath":"/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data/train.csv",
+            "mmcif_dir": "/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/data/rna_cifs_jiayou_0403/train_protenix",
+            "bioassembly_dict_dir": "/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/data/rna_cifs_jiayou_0403/train_protenix",
+            "indices_fpath":"/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/data/rna_cifs_jiayou_0403/train_protenix/train.csv",
             "pdb_list": "",
-            "random_sample_if_failed": False, #True, ###### debug
+            "random_sample_if_failed": True, 
             "max_n_token": -1,  # can be used for removing data with too many tokens.
             "use_reference_chains_only": False,
             "exclusion": {  # do not sample the data based on ions.
-                "mol_1_type": ListValue(["ions"]),
-                "mol_2_type": ListValue(["ions"]),
+                "mol_1_type": ListValue(["ions", "ligands"]),
+                "mol_2_type": ListValue(["ions", "ligands"]),
             },
         },
-        **deepcopy(default_weighted_pdb_configs),
+        **deepcopy(kaggle_weighted_pdb_configs),
     },
-    "weightedPDB_before2109_wopb_nometalc_0925": {
-        "base_info": {
-            "mmcif_dir": os.path.join(DATA_ROOT_DIR, "mmcif"),
-            "bioassembly_dict_dir": os.path.join(DATA_ROOT_DIR, "mmcif_bioassembly"),
-            "indices_fpath": os.path.join(
-                DATA_ROOT_DIR,
-                "indices/weightedPDB_indices_before_2021-09-30_wo_posebusters_resolution_below_9.csv.gz",
-            ),
-            "pdb_list": "",
-            "random_sample_if_failed": True,
-            "max_n_token": -1,  # can be used for removing data with too many tokens.
-            "use_reference_chains_only": False,
-            "exclusion": {  # do not sample the data based on ions.
-                "mol_1_type": ListValue(["ions"]),
-                "mol_2_type": ListValue(["ions"]),
-            },
-        },
-        **deepcopy(default_weighted_pdb_configs),
-    },
+    # "weightedPDB_before2109_wopb_nometalc_0925": {
+    #     "base_info": {
+    #         "mmcif_dir": os.path.join(DATA_ROOT_DIR, "mmcif"),
+    #         "bioassembly_dict_dir": os.path.join(DATA_ROOT_DIR, "mmcif_bioassembly"),
+    #         "indices_fpath": os.path.join(
+    #             DATA_ROOT_DIR,
+    #             "indices/weightedPDB_indices_before_2021-09-30_wo_posebusters_resolution_below_9.csv.gz",
+    #         ),
+    #         "pdb_list": "",
+    #         "random_sample_if_failed": True,
+    #         "max_n_token": -1,  # can be used for removing data with too many tokens.
+    #         "use_reference_chains_only": False,
+    #         "exclusion": {  # do not sample the data based on ions.
+    #             "mol_1_type": ListValue(["ions"]),
+    #             "mol_2_type": ListValue(["ions"]),
+    #         },
+    #     },
+    #     **deepcopy(default_weighted_pdb_configs),
+    # },
     "kaggle_test": {
         "base_info": {
             # same as train (for now)
@@ -172,26 +197,26 @@ data_configs = {
         },
         **deepcopy(default_test_configs),
     },
-    "recentPDB_1536_sample384_0925": {
-        "base_info": {
-            "mmcif_dir": os.path.join(DATA_ROOT_DIR, "mmcif"),
-            "bioassembly_dict_dir": os.path.join(
-                DATA_ROOT_DIR, "recentPDB_bioassembly"
-            ),
-            "indices_fpath": os.path.join(
-                DATA_ROOT_DIR, "indices/recentPDB_low_homology_maxtoken1536.csv"
-            ),
-            "pdb_list": os.path.join(
-                DATA_ROOT_DIR,
-                "indices/recentPDB_low_homology_maxtoken1024_sample384_pdb_id.txt",
-            ),
-            "max_n_token": GlobalConfigValue("test_max_n_token"),  # filter data
-            "sort_by_n_token": False,
-            "group_by_pdb_id": True,
-            "find_eval_chain_interface": True,
-        },
-        **deepcopy(default_test_configs),
-    },
+    # "recentPDB_1536_sample384_0925": {
+    #     "base_info": {
+    #         "mmcif_dir": os.path.join(DATA_ROOT_DIR, "mmcif"),
+    #         "bioassembly_dict_dir": os.path.join(
+    #             DATA_ROOT_DIR, "recentPDB_bioassembly"
+    #         ),
+    #         "indices_fpath": os.path.join(
+    #             DATA_ROOT_DIR, "indices/recentPDB_low_homology_maxtoken1536.csv"
+    #         ),
+    #         "pdb_list": os.path.join(
+    #             DATA_ROOT_DIR,
+    #             "indices/recentPDB_low_homology_maxtoken1024_sample384_pdb_id.txt",
+    #         ),
+    #         "max_n_token": GlobalConfigValue("test_max_n_token"),  # filter data
+    #         "sort_by_n_token": False,
+    #         "group_by_pdb_id": True,
+    #         "find_eval_chain_interface": True,
+    #     },
+    #     **deepcopy(default_test_configs),
+    # },
     "posebusters_0925": {
         "base_info": {
             "mmcif_dir": os.path.join(DATA_ROOT_DIR, "posebusters_mmcif"),

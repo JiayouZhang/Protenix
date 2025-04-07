@@ -112,9 +112,10 @@ class InferenceRunner(object):
             checkpoint["model"] = {
                 k[len("module.") :]: v for k, v in checkpoint["model"].items()
             }
+        # TODO: handle rnalm correctly
         self.model.load_state_dict(
             state_dict=checkpoint["model"],
-            strict=self.configs.load_strict,
+            strict=False,  #self.configs.load_strict,
         )
         self.model.eval()
         self.print(f"Finish loading checkpoint.")

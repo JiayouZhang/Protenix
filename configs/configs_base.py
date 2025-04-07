@@ -342,7 +342,11 @@ loss_configs = {
         "clash": {"af3_clash_threshold": 1.1, "vdw_clash_threshold": 0.75},
     },
 }
-
+augment_configs = {
+    "augment": {
+     "use_rnalm": True,
+    }
+}
 configs = {
     **basic_configs,
     **data_configs,
@@ -350,4 +354,5 @@ configs = {
     **model_configs,
     **perm_configs,
     **loss_configs,
+    **augment_configs,
 }

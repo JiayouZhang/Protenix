@@ -31,6 +31,7 @@ from protenix.openfold_local.model.primitives import LayerNorm
 from protenix.utils.logger import get_logger
 from protenix.utils.permutation.permutation import SymmetricPermutation
 from protenix.utils.torch_utils import autocasting_disable_decorator
+from protenix.model.augment_utils import get_rnalm_embeddings
 
 from .modules.confidence import ConfidenceHead
 from .modules.diffusion import DiffusionModule
@@ -90,6 +91,15 @@ class Protenix(nn.Module):
         self.linear_no_bias_sinit = LinearNoBias(
             in_features=self.c_s_inputs, out_features=self.c_s
         )
+
+        if self.configs.augment.use_rnalm:
+            from modelgenerator.tasks import Embed
+            self.rnalm = Embed.from_config({"model.backbone": "aido_rna_650m"})
+            self.rnalm.requires_grad_(False)
+            self.linear_no_bias_sinit_rnalm = LinearNoBias(
+                in_features=self.rnalm.backbone.get_embedding_size(), out_features=self.c_s
+            )
+
         self.linear_no_bias_zinit1 = LinearNoBias(
             in_features=self.c_s, out_features=self.c_z
         )
@@ -149,6 +159,12 @@ class Protenix(nn.Module):
             input_feature_dict, inplace_safe=False, chunk_size=chunk_size
         )  # [..., N_token, 449]
         s_init = self.linear_no_bias_sinit(s_inputs)  #  [..., N_token, c_s]
+
+        if self.configs.augment.use_rnalm:
+            s_init_rnalm = get_rnalm_embeddings(input_feature_dict, self.rnalm)  # [N_token, c_rnalm]
+            s_init_rnalm = self.linear_no_bias_sinit_rnalm(s_init_rnalm)         # [N_token, c_s]
+            s_init = s_init + s_init_rnalm
+
         z_init = (
             self.linear_no_bias_zinit1(s_init)[..., None, :]
             + self.linear_no_bias_zinit2(s_init)[..., None, :, :]
