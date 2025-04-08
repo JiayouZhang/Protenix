@@ -41,6 +41,7 @@ basic_configs = {
     "train_confidence_only": False,
     "use_wandb": True,
     "wandb_id": "",
+    "wandb_entity":"",
     "seed": 42,
     "deterministic": False,
     "ema_decay": -1.0,

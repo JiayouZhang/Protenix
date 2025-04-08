@@ -112,7 +112,7 @@ class InferenceRunner(object):
             checkpoint["model"] = {
                 k[len("module.") :]: v for k, v in checkpoint["model"].items()
             }
-        # TODO: handle rnalm correctly
+        # TODO: currently handcoded for RNALM loading, need to fix later
         self.model.load_state_dict(
             state_dict=checkpoint["model"],
             strict=False,  #self.configs.load_strict,

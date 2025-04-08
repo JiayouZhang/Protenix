@@ -34,9 +34,14 @@ def get_rnalm_embeddings(input_feature_dict, rnalm,
     protenix_rna_id = torch.nonzero(protenix_restype == 1, as_tuple=False)[:,1].tolist()
     assert len(protenix_rna_id) == seq_len, "Sequence length mismatch"
     # convert to RNALM tokens
-    rna_seq = "".join([protenix_rna_id_2_rnalm_token[id] for id in protenix_rna_id])
+    rna_seq = ""
+    for id in protenix_rna_id:
+        if id in protenix_rna_id_2_rnalm_token:
+            rna_seq += protenix_rna_id_2_rnalm_token[id]
+        else:
+            rna_seq += "N"
     # get embedding from RNALM
-    rnalm_input = rnalm.transform({"sequences": [rna_seq]})    # add [cls] and [sep] automatically
+    rnalm_input = rnalm.transform({"sequences": [rna_seq]})    # will add [cls] and [sep] automatically
     rnalm_input = {k: v.to(device) for k, v in rnalm_input.items() if type(v) == torch.Tensor}
     rnalm_embeddings = rnalm(rnalm_input)[:, 1:-1, :].squeeze()          # [N_token, c_rnalm]
     return rnalm_embeddings

@@ -99,6 +99,7 @@ class AF3Trainer(object):
         if self.configs.use_wandb and DIST_WRAPPER.rank == 0:
             wandb.init(
                 project=self.configs.project,
+                entity=self.configs.wandb_entity,
                 name=self.run_name,
                 config=vars(self.configs),
                 id=self.configs.wandb_id or None,
@@ -229,9 +230,10 @@ class AF3Trainer(object):
                     k[len("module.") :]: v for k, v in checkpoint["model"].items()
                 }
 
+            # TODO: currently handcoded for RNALM loading, need to fix later
             self.model.load_state_dict(
                 state_dict=checkpoint["model"],
-                strict=self.configs.load_strict,
+                strict=False #self.configs.load_strict,
             )
             if not load_params_only:
                 if not skip_load_optimizer:
