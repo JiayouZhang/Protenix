@@ -139,7 +139,7 @@ if (not os.path.exists(CCD_COMPONENTS_FILE_PATH)) or (
 
 data_configs = {
     "num_dl_workers": 16,
-    "epoch_size": 1000,
+    "epoch_size": 10000,
     "train_ref_pos_augment": True,
     "test_ref_pos_augment": True,
     "train_sets": ListValue(["weightedPDB_before2109_wopb_nometalc_0925"]),
@@ -183,13 +183,25 @@ data_configs = {
         },
         **deepcopy(default_weighted_pdb_configs),
     },
-    "kaggle_test": {
+    "kaggle_recentPDB": {
         "base_info": {
-            # same as train (for now)
             "mmcif_dir": "/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/data/rna_cifs_jiayou_0403/valid_protenix",
             "bioassembly_dict_dir": "/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/data/rna_cifs_jiayou_0403/valid_protenix",
             "indices_fpath":"/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/data/rna_cifs_jiayou_0403/valid_protenix/valid.csv",
             "pdb_list": "",
+            "max_n_token": GlobalConfigValue("test_max_n_token"),  # filter data
+            "sort_by_n_token": False,
+            "group_by_pdb_id": True,
+            "find_eval_chain_interface": True,
+        },
+        **deepcopy(default_test_configs),
+    },
+    "kaggle_test": { 
+        "base_info": {
+            "mmcif_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
+            "bioassembly_dict_dir": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data",
+            "indices_fpath": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data_test/test.csv",
+            "pdb_list": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2_test/casp15_pdb_full_id.txt",
             "max_n_token": GlobalConfigValue("test_max_n_token"),  # filter data
             "sort_by_n_token": False,
             "group_by_pdb_id": True,
