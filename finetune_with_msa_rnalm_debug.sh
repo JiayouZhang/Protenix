@@ -25,9 +25,9 @@ PROGRAM="./runner/train.py \
     --eval_first False \
     --eval_ema_only True \
     --iters_to_accumulate 1 \
-    --eval_interval 500 \
+    --eval_interval 2 \
     --log_interval 10 \
-    --checkpoint_interval 500 \
+    --checkpoint_interval 2 \
     --ema_decay 0.999 \
     --train_crop_size 640 \
     --test_max_n_token 1024 \

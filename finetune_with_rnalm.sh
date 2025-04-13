@@ -37,7 +37,7 @@ PROGRAM="./runner/train.py \
     --max_steps 10000 \
     --warmup_steps 100 \
     --lr 0.001 \
-    --augment.use_rnalm False \
+    --augment.use_rnalm True \
     --sample_diffusion.N_step 20 \
     --load_checkpoint_path ${checkpoint_path} \
     --load_ema_checkpoint_path ${checkpoint_path} \

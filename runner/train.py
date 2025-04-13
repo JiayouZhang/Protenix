@@ -194,8 +194,14 @@ class AF3Trainer(object):
     def save_checkpoint(self, ema_suffix=""):
         if DIST_WRAPPER.rank == 0:
             path = f"{self.checkpoint_dir}/{self.step}{ema_suffix}.pt"
+            model_state_dict = self.model.state_dict()
+            # don't save rnalm weights to save disk space
+            if self.configs.augment.use_rnalm:
+                for k in list(model_state_dict.keys()):
+                    if k.startswith(f"rnalm."):
+                        model_state_dict.pop(k)
             checkpoint = {
-                "model": self.model.state_dict(),
+                "model": model_state_dict,
                 "optimizer": self.optimizer.state_dict(),
                 "scheduler": (
                     self.lr_scheduler.state_dict()
@@ -230,10 +236,9 @@ class AF3Trainer(object):
                     k[len("module.") :]: v for k, v in checkpoint["model"].items()
                 }
 
-            # TODO: currently handcoded for RNALM loading, need to fix later
             self.model.load_state_dict(
                 state_dict=checkpoint["model"],
-                strict=False #self.configs.load_strict,
+                strict=self.configs.load_strict if not self.configs.augment.use_rnalm else False
             )
             if not load_params_only:
                 if not skip_load_optimizer:
