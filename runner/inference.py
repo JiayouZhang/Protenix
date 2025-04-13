@@ -115,7 +115,7 @@ class InferenceRunner(object):
         # TODO: currently handcoded for RNALM loading, need to fix later
         self.model.load_state_dict(
             state_dict=checkpoint["model"],
-            strict=False,  #self.configs.load_strict,
+            strict=self.configs.load_strict,
         )
         self.model.eval()
         self.print(f"Finish loading checkpoint.")
@@ -300,7 +300,7 @@ def run() -> None:
         arg_str=parse_sys_args(),
         fill_required_with_null=True,
     )
-    download_infercence_cache(configs, model_version="v0.2.0")
+    #download_infercence_cache(configs, model_version="v0.2.0")
     main(configs)
 
 

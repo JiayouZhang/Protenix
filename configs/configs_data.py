@@ -190,9 +190,9 @@ data_configs = {
             "indices_fpath":"/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/data/rna_cifs_jiayou_0403/valid_protenix/valid.csv",
             "pdb_list": "",
             "max_n_token": GlobalConfigValue("test_max_n_token"),  # filter data
-            "sort_by_n_token": False,
+            "sort_by_n_token": True,
             "group_by_pdb_id": True,
-            "find_eval_chain_interface": True,
+            "find_eval_chain_interface": False,
         },
         **deepcopy(default_test_configs),
     },
@@ -203,9 +203,9 @@ data_configs = {
             "indices_fpath": "/home/jiayou.zhang/hom/personal/rna-stanford/kaggle/train_protenix/data_test/test.csv",
             "pdb_list": "/home/jiayou.zhang/hom/personal/rna-stanford/rna_data_filtering_v2_test/casp15_pdb_full_id.txt",
             "max_n_token": GlobalConfigValue("test_max_n_token"),  # filter data
-            "sort_by_n_token": False,
-            "group_by_pdb_id": True,
-            "find_eval_chain_interface": True,
+            "sort_by_n_token": True,
+            "group_by_pdb_id": False,
+            "find_eval_chain_interface": False,
         },
         **deepcopy(default_test_configs),
     },
@@ -257,7 +257,7 @@ data_configs = {
         },
         "rna": {
             "seq_to_pdb_idx_path": "",
-            "rna_msa_dir": "",
+            "rna_msa_dir": "/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/stanford-rna-3d-folding/MSA",
             "indexing_method": "sequence",
         },
         "strategy": "random",

@@ -366,7 +366,13 @@ class AF3Trainer(object):
                 simple_metrics = {}
                 with enable_amp:
                     # Model forward
+                    # print(f"{pid}, seq_len={batch['basic']['N_token'].item()}")
+                    # print(f"[Memory Allocated Before] {torch.cuda.memory_allocated() / 1024**3:.2f} GB")
+
                     batch, _ = self.model_forward(batch, mode=mode)
+
+                    # print(f"[Memory Allocated After] {torch.cuda.memory_allocated() / 1024**3:.2f} GB")
+
                     # Loss forward
                     loss, loss_dict, batch = self.get_loss(batch, mode="eval")
                     # lDDT metrics

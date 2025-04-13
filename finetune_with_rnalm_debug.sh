@@ -7,38 +7,34 @@ export NCCL_DEBUG=INFO
 export TORCH_DISTRIBUTED_DEBUG=DETAIL
 
 
-MODE="multi_gpu"  # single_gpu, multi_gpu, or multi_node
+MODE="single_gpu"  # single_gpu, multi_gpu, or multi_node
 echo "Running in $MODE mode"
 
 
 # wget -P /af3-dev/release_model/ https://af3-dev.tos-cn-beijing.volces.com/release_model/model_v0.2.0.pt
 checkpoint_path="./release_data/checkpoint/model_v0.2.0.pt"
 
-
-run_name=protenix_finetune_msa_bs16_len384_lr5e-4_maxsteps10k
-
 PROGRAM="./runner/train.py \
-    --run_name ${run_name} \
+    --run_name protenix_finetune_msa_aidorna650m_debug \
     --seed 42 \
     --base_dir ./output \
     --dtype bf16 \
     --project protenix \
-    --use_wandb True \
-    --wandb_entity shuxian-zou \
-    --diffusion_batch_size 48 \
-    --eval_first True \
+    --use_wandb False \
+    --diffusion_batch_size 32 \
+    --eval_first False \
     --eval_ema_only True \
-    --iters_to_accumulate 4 \
-    --eval_interval 400 \
+    --iters_to_accumulate 1 \
+    --eval_interval 500 \
     --log_interval 10 \
-    --checkpoint_interval 400 \
+    --checkpoint_interval 500 \
     --ema_decay 0.999 \
-    --train_crop_size 384 \
+    --train_crop_size 640 \
     --test_max_n_token 1024 \
-    --max_steps 10000 \
-    --warmup_steps 200 \
-    --lr 0.0005 \
-    --augment.use_rnalm False \
+    --max_steps 50000 \
+    --warmup_steps 500 \
+    --lr 0.001 \
+    --augment.use_rnalm True \
     --sample_diffusion.N_step 20 \
     --load_checkpoint_path ${checkpoint_path} \
     --load_ema_checkpoint_path ${checkpoint_path} \
@@ -48,11 +44,10 @@ PROGRAM="./runner/train.py \
 
 
 if [ $MODE == "single_gpu" ]; then
-    LOG="logs/${run_name}_$(date +%Y%m%d_%H%M%S).log"
-    CUDA_VISIBLE_DEVICES=1 python $PROGRAM 2>&1 | tee $LOG
+    CUDA_VISIBLE_DEVICES=3 python $PROGRAM
 
 elif [ $MODE == "multi_gpu" ]; then
-    LOG="logs/${run_name}_$(date +%Y%m%d_%H%M%S).log"
+    LOG="logs/protenix_finetune_msa_aidorna650m_bs16_$(date +%Y%m%d_%H%M%S).log"
     torchrun --nproc-per-node 4 $PROGRAM 2>&1 | tee $LOG
 
 else

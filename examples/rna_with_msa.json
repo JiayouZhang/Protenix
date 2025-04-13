@@ -1,0 +1,17 @@
+[
+    {
+        "sequences": [
+            {
+                "rnaSequence": {
+                    "sequence": "GGGGGCCACAGCAGAAGCGUUCACGUCGCAGCCCCUGUCAGCCAUUGCACUCCGGCUGCGAAUUCUGCU",
+                    "count": 1,
+                    "msa": {
+                        "precomputed_msa_dir": "/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/stanford-rna-3d-folding/MSA/R1107.MSA.fasta",
+                        "pairing_db": "uniref100"
+                    }
+                }
+            }
+        ],
+        "name": "R1107"
+    }
+]

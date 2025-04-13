@@ -161,7 +161,11 @@ class Protenix(nn.Module):
         s_init = self.linear_no_bias_sinit(s_inputs)  #  [..., N_token, c_s]
 
         if self.configs.augment.use_rnalm:
+            # rnalm forward time: 0.043s for seq of len 642, so the bottleneck is not here (total time: 16.94s)
+            # start = time.time()
             s_init_rnalm = get_rnalm_embeddings(input_feature_dict, self.rnalm)  # [N_token, c_rnalm]
+            # end = time.time()
+            # print(f"get_rnalm_embeddings time: {end - start:.4f}s for seq of len {s_inputs.shape[0]+2}")
             s_init_rnalm = self.linear_no_bias_sinit_rnalm(s_init_rnalm)         # [N_token, c_s]
             s_init = s_init + s_init_rnalm
 
