@@ -246,7 +246,7 @@ data_configs = {
         **deepcopy(default_test_configs),
     },
     "msa": {
-        "enable": True,
+        "enable_prot_msa": True,
         "enable_rna_msa": False,
         "prot": {
             "pairing_db": "uniref100",
@@ -256,7 +256,7 @@ data_configs = {
             "indexing_method": "sequence",
         },
         "rna": {
-            "seq_to_pdb_idx_path": "",
+            "seq_to_pdb_idx_path": "/home/jiayou.zhang/hom/personal/rna-stanford/rna-msa-kaggle/query_to_path.pkl",
             "rna_msa_dir": "/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/stanford-rna-3d-folding/MSA",
             "indexing_method": "sequence",
         },

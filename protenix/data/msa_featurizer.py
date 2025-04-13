@@ -324,9 +324,6 @@ class PROTMSAFeaturizer(BaseMSAFeaturizer):
         else:
             self.non_pairing_db = [db_name for db_name in non_pairing_db.split(",")]
 
-        if KAGGLE:
-            return
-
         with open(seq_to_pdb_idx_path, "r") as f:
             self.seq_to_pdb_idx = json.load(f)
         # If distillation data is avaiable
@@ -528,10 +525,13 @@ class RNAMSAFeaturizer(BaseMSAFeaturizer):
         # By default, use all the database in paper
         self.rna_msa_dir = rna_msa_dir
         self.non_pairing_db = ["rfam", "rnacentral", "nucleotide"]
-        if KAGGLE:
-            return
-        with open(seq_to_pdb_idx_path, "r") as f:
-            self.seq_to_pdb_idx = json.load(f)  # it's rna sequence to pdb list
+        if seq_to_pdb_idx_path.endswith(".pkl"):
+            with open(seq_to_pdb_idx_path, "rb") as f:
+                self.seq_to_pdb_idx = None
+                self.seq_to_msa_path = pickle.load(f) # rna seq to msa
+        else:
+            with open(seq_to_pdb_idx_path, "r") as f:
+                self.seq_to_pdb_idx = json.load(f)  # it's rna sequence to pdb list
 
     def get_msa_path(
         self, db_name: str, sequence: str, pdb_id_entity_id: str, reduced: bool = True
@@ -587,31 +587,20 @@ class RNAMSAFeaturizer(BaseMSAFeaturizer):
         Returns:
             Dict[str, np.ndarray]: the basic MSA features of the input sequence
         """
-        if KAGGLE:
-            if sequence in QUERY_TO_PATH:
-                rna_msa_paths = [QUERY_TO_PATH[sequence]]
-                seq_limits = [-1] # -1 means no limit
-            else:
-                #logger.warning(f"no msa for {sequence}.")  # disable for now since too many no msa
-                rna_msa_paths = []
-                seq_limits = []
-            sequence_features = process_single_sequence(
-                pdb_name=pdb_name,
-                sequence=sequence,
-                raw_msa_paths=rna_msa_paths,
-                seq_limits=seq_limits,
-                msa_entity_type="rna",
-                msa_type="non_pairing",
-            )
-            return sequence_features
-
         raw_msa_paths, seq_limits = [], []
-        for db_name in self.non_pairing_db:
-            if opexists(
-                path := self.get_msa_path(db_name, sequence, pdb_name)
-            ) and path.endswith(".sto"):
-                raw_msa_paths.append(path)
-                seq_limits.append(self.seq_limits.get(db_name, SEQ_LIMITS[db_name]))
+        if self.seq_to_pdb_idx is None and self.seq_to_msa_path is not None:
+            if sequence in self.seq_to_msa_path:
+                raw_msa_paths.append(self.seq_to_msa_path[sequence])
+                seq_limits.append(16384)  # -1 means no limit
+            else:
+                logger.info(f"No MSA for {sequence}.")  # disable for now since too many no msa
+        else:
+            for db_name in self.non_pairing_db:
+                if opexists(
+                    path := self.get_msa_path(db_name, sequence, pdb_name)
+                ) and path.endswith(".sto"):
+                    raw_msa_paths.append(path)
+                    seq_limits.append(self.seq_limits.get(db_name, SEQ_LIMITS[db_name]))
 
         sequence_features = process_single_sequence(
             pdb_name=pdb_name,
@@ -675,9 +664,14 @@ class MSAFeaturizer:
         self,
         prot_msa_args: dict = {},
         rna_msa_args: dict = {},
+        enbale_prot_msa: bool = True, 
         enable_rna_msa: bool = False,
     ):
-        self.prot_msa_featurizer = PROTMSAFeaturizer(**prot_msa_args)
+        self.enable_prot_msa = enbale_prot_msa
+        self.enable_rna_msa = enable_rna_msa
+        assert self.enable_prot_msa + self.enable_rna_msa > 0
+        if self.enable_prot_msa:
+            self.prot_msa_featurizer = PROTMSAFeaturizer(**prot_msa_args)
         self.enable_rna_msa = enable_rna_msa if not KAGGLE else True
         if self.enable_rna_msa:
             self.rna_msa_featurizer = RNAMSAFeaturizer(**rna_msa_args)
@@ -699,11 +693,14 @@ class MSAFeaturizer:
         Returns:
             Optional[dict[str, np.ndarray]]: A dictionary containing the merged MSA features for the bioassembly, or None if no features are generated.
         """
-        prot_msa_feats = self.prot_msa_featurizer.get_msa_features_for_assembly(
-            bioassembly_dict=bioassembly_dict,
-            entity_to_asym_id_int=entity_to_asym_id_int,
-            selected_token_indices=selected_indices,
-        )
+        if self.enable_prot_msa:
+            prot_msa_feats = self.prot_msa_featurizer.get_msa_features_for_assembly(
+                bioassembly_dict=bioassembly_dict,
+                entity_to_asym_id_int=entity_to_asym_id_int,
+                selected_token_indices=selected_indices,
+            )
+        else:
+            prot_msa_feats = None
         if self.enable_rna_msa:
             rna_msa_feats = self.rna_msa_featurizer.get_msa_features_for_assembly(
                 bioassembly_dict=bioassembly_dict,

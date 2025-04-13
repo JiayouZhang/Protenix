@@ -786,7 +786,7 @@ def get_msa_featurizer(configs, dataset_name: str, stage: str) -> Optional[Calla
     Returns:
         An MSAFeaturizer object if MSA is enabled in the configurations, otherwise None.
     """
-    if "msa" in configs["data"] and configs["data"]["msa"]["enable"]:
+    if "msa" in configs["data"] and (configs["data"]["msa"]["enable_prot_msa"] or configs["data"]["msa"]["enable_rna_msa"]):
         msa_info = configs["data"]["msa"]
         msa_args = deepcopy(msa_info)
 
@@ -799,26 +799,29 @@ def get_msa_featurizer(configs, dataset_name: str, stage: str) -> Optional[Calla
                         msa_args[k][kk] = vv
 
         prot_msa_args = msa_args["prot"]
-        prot_msa_args.update(
-            {
-                "dataset_name": dataset_name,
-                "merge_method": msa_args["merge_method"],
-                "max_size": msa_args["max_size"][stage],
-            }
-        )
+        if configs["data"]["msa"]["enable_prot_msa"]:
+            prot_msa_args.update(
+                {
+                    "dataset_name": dataset_name,
+                    "merge_method": msa_args["merge_method"],
+                    "max_size": msa_args["max_size"][stage],
+                }
+            )
 
         rna_msa_args = msa_args["rna"]
-        rna_msa_args.update(
-            {
-                "dataset_name": dataset_name,
-                "merge_method": msa_args["merge_method"],
-                "max_size": msa_args["max_size"][stage],
-            }
-        )
+        if configs["data"]["msa"]["enable_rna_msa"]:
+            rna_msa_args.update(
+                {
+                    "dataset_name": dataset_name,
+                    "merge_method": msa_args["merge_method"],
+                    "max_size": msa_args["max_size"][stage],
+                }
+            )
 
         return MSAFeaturizer(
             prot_msa_args=prot_msa_args,
             rna_msa_args=rna_msa_args,
+            enbale_prot_msa=configs.data.msa.enable_prot_msa,
             enable_rna_msa=configs.data.msa.enable_rna_msa,
         )
 

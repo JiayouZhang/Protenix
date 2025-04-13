@@ -15,7 +15,7 @@ echo "Running in $MODE mode"
 checkpoint_path="./release_data/checkpoint/model_v0.2.0.pt"
 
 
-run_name=protenix_finetune_msa_bs16_len384_lr5e-4_maxsteps10k
+run_name=protenix_finetune_aidorna650m_bs16_len384_maxsteps10k
 
 PROGRAM="./runner/train.py \
     --run_name ${run_name} \
@@ -27,7 +27,6 @@ PROGRAM="./runner/train.py \
     --wandb_entity shuxian-zou \
     --diffusion_batch_size 48 \
     --eval_first True \
-    --eval_ema_only True \
     --iters_to_accumulate 4 \
     --eval_interval 400 \
     --log_interval 10 \
@@ -36,16 +35,18 @@ PROGRAM="./runner/train.py \
     --train_crop_size 384 \
     --test_max_n_token 1024 \
     --max_steps 10000 \
-    --warmup_steps 200 \
-    --lr 0.0005 \
+    --warmup_steps 100 \
+    --lr 0.001 \
     --augment.use_rnalm False \
     --sample_diffusion.N_step 20 \
     --load_checkpoint_path ${checkpoint_path} \
     --load_ema_checkpoint_path ${checkpoint_path} \
     --data.train_sets kaggle_train \
-    --data.test_sets kaggle_test
+    --data.test_sets kaggle_test \
+    --data.msa.enable_prot_msa False \
+    --data.msa.enable_rna_msa False
     "
-
+    # --eval_ema_only True \
 
 if [ $MODE == "single_gpu" ]; then
     LOG="logs/${run_name}_$(date +%Y%m%d_%H%M%S).log"
