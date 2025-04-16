@@ -21,18 +21,34 @@ N_sample=5
 N_step=200
 N_cycle=10
 seed=101
-# use_deepspeed_evo_attention=true
-input_json_path="./examples/test.json"
-dump_dir="/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/protenix_output/output_msa_aido"
-checkpoint_path="./output/protenix_finetune_msa_aidorna650m_bs16_len384_maxsteps10k_20250409_172311/checkpoints/3999_ema_0.999.pt"
 
-python3 runner/inference.py \
+input_json_path=/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/protenix_output/test.json
+
+###################################
+
+# run_name=msa_aidorna650m_len384_5999_ema_pt
+# checkpoint_path=./output/protenix_finetune_msa_aidorna650m_bs16_len384_maxsteps10k_20250409_172311/checkpoints/5999_ema_0.999.pt
+
+# run_name=msa_len384_4399_ema_pt
+# checkpoint_path=./output/protenix_finetune_msa_bs16_len384_maxsteps10k_20250409_171051/checkpoints/4399_ema_0.999.pt
+
+# run_name=msa_aidorna650m_len384_lr5e-4_4799_ema_pt
+# checkpoint_path=./output/protenix_finetune_msa_aidorna650m_bs16_len384_lr5e-4_maxsteps10k_20250409_212337/checkpoints/4799_ema_0.999.pt
+
+run_name=msa_len384_lr5e-4_6399_ema_pt
+checkpoint_path=./output/protenix_finetune_msa_bs16_len384_lr5e-4_maxsteps10k_20250409_233611/checkpoints/6399_ema_0.999.pt
+
+###################################
+dump_dir=/lustre/scratch/shared-folders/bio_project/shuxian/rna_folding/protenix_output/${run_name}
+
+CUDA_VISIBLE_DEVICES=2 python3 runner/inference.py \
 --seeds ${seed} \
 --dump_dir ${dump_dir} \
 --input_json_path ${input_json_path} \
 --model.N_cycle ${N_cycle} \
 --sample_diffusion.N_sample ${N_sample} \
 --sample_diffusion.N_step ${N_step} \
---augment.use_rnalm True \
+--augment.use_rnalm False \
 --load_checkpoint_path ${checkpoint_path} \
 --use_msa True
+#2>&1 | tee ${dump_dir}/inference.log 

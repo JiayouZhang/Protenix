@@ -129,7 +129,7 @@ REQUIRED_FEATURES = frozenset(
 )
 
 PROT_TYPE_NAME = "proteinChain"  # inference protein name in json
-
+RNA_TYPE_NAME = "rnaSequence"  # inference rna name in json
 
 def make_dummy_msa_obj(input_sequence) -> parsers.Msa:
     deletion_matrix = [[0 for _ in input_sequence]]
