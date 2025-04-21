@@ -668,7 +668,6 @@ class MSAFeaturizer:
         assert self.enable_prot_msa + self.enable_rna_msa > 0
         if self.enable_prot_msa:
             self.prot_msa_featurizer = PROTMSAFeaturizer(**prot_msa_args)
-        self.enable_rna_msa = enable_rna_msa if not KAGGLE else True
         if self.enable_rna_msa:
             self.rna_msa_featurizer = RNAMSAFeaturizer(**rna_msa_args)
 
