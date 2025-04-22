@@ -51,10 +51,46 @@ aido_rna_650m_config = {
             }
 
 
+aido_rna_1b600m_config = {
+                "model.backbone": "aido_rna_1b600m",
+                "model.backbone.from_scratch": True,
+                "model.backbone.config_overwrites": {
+                    "add_linear_bias": True,
+                    "architectures": [
+                        "RNABertForMaskedLM"
+                    ],
+                    "attention_probs_dropout_prob": 0.0,
+                    "hidden_act": "swiglu",
+                    "hidden_dropout_prob": 0.0,
+                    "hidden_size": 2048,
+                    "initializer_range": 0.02,
+                    "intermediate_size": 5440,
+                    "layer_norm_eps": 1e-05,
+                    "max_position_embeddings": 1024,
+                    "model_type": "rnabert",
+                    "normalization_type": "LayerNorm",
+                    "num_attention_heads": 32,
+                    "num_hidden_layers": 32,
+                    "pad_token_id": 0,
+                    "position_embedding_type": "rope",
+                    "rotary_percent": 1.0,
+                    "seq_len_interpolation_factor": None,
+                    "tokenizer_type": "BertWordPieceLowerCase",
+                    "torch_dtype": "float32",
+                    "transformers_version": "4.38.0.dev0",
+                    "type_vocab_size": 2,
+                    "use_cache": True,
+                    "vocab_size": 16
+                    }
+            }
+
+
+
 def get_rnalm_embeddings(input_feature_dict, rnalm, 
                         protenix_rna_id_2_rnalm_token=PROTENIX_RNA_ID_2_AIDORNA_RESIDUES):
     """
     Convert Protenix restypes to RNALM tokens.
+
     Args:
         input_feature_dict (dict): Dictionary containing the input features.
         rnalm (object): RNALM object. Default to be AIDO.RNA-650m.

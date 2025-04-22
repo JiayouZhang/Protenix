@@ -196,7 +196,7 @@ class AF3Trainer(object):
             path = f"{self.checkpoint_dir}/{self.step}{ema_suffix}.pt"
             model_state_dict = self.model.state_dict()
             # don't save rnalm weights to save disk space
-            if self.configs.augment.use_rnalm:
+            if self.configs.augment.use_rnalm and self.configs.augment.save_ckpt_without_rnalm:
                 for k in list(model_state_dict.keys()):
                     if k.startswith(f"rnalm."):
                         model_state_dict.pop(k)

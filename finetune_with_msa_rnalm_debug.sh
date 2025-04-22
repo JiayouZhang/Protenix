@@ -15,7 +15,7 @@ echo "Running in $MODE mode"
 checkpoint_path="./release_data/checkpoint/model_v0.2.0.pt"
 
 PROGRAM="./runner/train.py \
-    --run_name protenix_finetune_msa_aidorna650m_debug \
+    --run_name protenix_finetune_msa_aidorna1.6b_debug \
     --seed 42 \
     --base_dir ./debug \
     --dtype bf16 \
@@ -35,6 +35,7 @@ PROGRAM="./runner/train.py \
     --warmup_steps 500 \
     --lr 0.001 \
     --augment.use_rnalm True \
+    --augment.rnalm_name aido_rna_1b600m \
     --sample_diffusion.N_step 20 \
     --load_checkpoint_path ${checkpoint_path} \
     --load_ema_checkpoint_path ${checkpoint_path} \

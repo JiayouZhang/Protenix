@@ -347,6 +347,7 @@ augment_configs = {
     "augment": {
      "use_rnalm": True,
      "rnalm_name": "aido_rna_650m",
+     "save_ckpt_without_rnalm": False,
     }
 }
 configs = {

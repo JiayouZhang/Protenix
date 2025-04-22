@@ -35,6 +35,7 @@ PROGRAM="./runner/train.py \
     --warmup_steps 500 \
     --lr 0.001 \
     --augment.use_rnalm True \
+    --augment.rnalm_name aido_rna_1b600m \
     --sample_diffusion.N_step 20 \
     --load_checkpoint_path ${checkpoint_path} \
     --load_ema_checkpoint_path ${checkpoint_path} \

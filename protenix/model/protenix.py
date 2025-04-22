@@ -96,11 +96,14 @@ class Protenix(nn.Module):
             from modelgenerator.tasks import Embed
             if "input_json_path" in configs:
                 # inference mode, don't load the checkpoint
-                from protenix.model.augment_utils import aido_rna_650m_config
                 if self.configs.augment.rnalm_name == "aido_rna_650m":
+                    from protenix.model.augment_utils import aido_rna_650m_config
                     self.rnalm = Embed.from_config(aido_rna_650m_config)
+                elif self.configs.augment.rnalm_name == "aido_rna_1b600m":
+                    from protenix.model.augment_utils import aido_rna_1b600m_config
+                    self.rnalm = Embed.from_config(aido_rna_1b600m_config)
                 else:
-                    raise NotImplementedError
+                    raise NotImplementedError("Only aido_rna_650m and aido_rna_1b600m are supported")
             else:
                 # training mode
                 self.rnalm = Embed.from_config({"model.backbone": self.configs.augment.rnalm_name})
