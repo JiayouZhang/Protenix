@@ -94,7 +94,16 @@ class Protenix(nn.Module):
 
         if self.configs.augment.use_rnalm:
             from modelgenerator.tasks import Embed
-            self.rnalm = Embed.from_config({"model.backbone": self.configs.augment.rnalm_name})
+            if "input_json_path" in configs:
+                # inference mode, don't load the checkpoint
+                from protenix.model.augment_utils import aido_rna_650m_config
+                if self.configs.augment.rnalm_name == "aido_rna_650m":
+                    self.rnalm = Embed.from_config(aido_rna_650m_config)
+                else:
+                    raise NotImplementedError
+            else:
+                # training mode
+                self.rnalm = Embed.from_config({"model.backbone": self.configs.augment.rnalm_name})
             self.rnalm.requires_grad_(False)
             self.linear_no_bias_sinit_rnalm = LinearNoBias(
                 in_features=self.rnalm.backbone.get_embedding_size(), out_features=self.c_s
