@@ -346,6 +346,7 @@ loss_configs = {
 augment_configs = {
     "augment": {
      "use_rnalm": True,
+     "rnalm_name": "aido_rna_650m",
     }
 }
 configs = {

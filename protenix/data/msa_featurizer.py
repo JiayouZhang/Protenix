@@ -21,7 +21,7 @@ from copy import deepcopy
 from os.path import exists as opexists
 from os.path import join as opjoin
 from typing import Any, Mapping, Optional, Sequence, Union
-
+import pickle
 import numpy as np
 import torch
 from biotite.structure import AtomArray
