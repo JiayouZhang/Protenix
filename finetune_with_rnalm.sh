@@ -15,7 +15,7 @@ echo "Running in $MODE mode"
 checkpoint_path="./release_data/checkpoint/model_v0.2.0.pt"
 
 
-run_name=protenix_finetune_aidorna650m_bs16_len640_lr5e-4_maxsteps10k
+run_name=protenix_finetune_aidorna1.6b_bs16_len640_lr5e-4_maxsteps10k
 
 PROGRAM="./runner/train.py \
     --run_name ${run_name} \
